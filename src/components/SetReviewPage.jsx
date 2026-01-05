@@ -3,10 +3,15 @@ import { useAuction } from '../context/AuctionContext';
 import { DEFAULT_AVATAR } from '../data/initialPlayers';
 
 const SetReviewPage = () => {
-  const { playerSets, setCurrentPage, addPlayerToSet, deletePlayerFromSet, currentSetIndex, setCurrentSetIndex } = useAuction();
+  const { 
+    playerSets, setCurrentPage, addPlayerToSet, deletePlayerFromSet, 
+    currentSetIndex, setCurrentSetIndex, 
+    importPlayersBulk // Ensure this is imported from context
+  } = useAuction();
+
   const [isStarting, setIsStarting] = useState(false);
 
-  // Local State for Adding Player
+  // Local State for Manual Add
   const [newPlayerName, setNewPlayerName] = useState("");
   const [newPlayerType, setNewPlayerType] = useState("Batsman");
   const [newPlayerPrice, setNewPlayerPrice] = useState(50);
@@ -15,6 +20,64 @@ const SetReviewPage = () => {
 
   const currentSet = playerSets[currentSetIndex] || { players: [] };
 
+  // --- 1. LOGIC: PROCESS THE CSV TEXT ---
+  const processCSV = (csvText) => {
+    const lines = csvText.split('\n');
+    const playersToImport = [];
+
+    lines.forEach((line) => {
+      // Expected Format: Name, SetName, Role, Country, Price, ImageURL
+      const parts = line.split(',');
+
+      if (parts.length >= 4) { 
+        const name = parts[0]?.trim();
+        const setName = parts[1]?.trim(); 
+        const role = parts[2]?.trim();
+        const country = parts[3]?.trim();
+        const price = parseFloat(parts[4]?.trim()) || 20;
+        const img = parts[5]?.trim() || "";
+
+        // Skip header row or empty lines
+        if(!name || name.toLowerCase() === "name") return;
+
+        if (name && setName) {
+          playersToImport.push({
+            targetSetName: setName,
+            player: {
+              id: Date.now() + Math.random(),
+              name: name,
+              type: role,
+              country: country,
+              isForeign: country.toLowerCase() !== 'india',
+              basePrice: price,
+              img: img
+            }
+          });
+        }
+      }
+    });
+
+    if (playersToImport.length > 0) {
+      importPlayersBulk(playersToImport);
+    } else {
+      alert("No valid players found in CSV. Check format.");
+    }
+  };
+
+  // --- 2. LOGIC: HANDLE FILE UPLOAD ---
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target.result;
+      processCSV(text);
+    };
+    reader.readAsText(file);
+  };
+
+  // --- 3. LOGIC: MANUAL ADD ---
   const handleAddPlayer = () => {
     if (!newPlayerName) return alert("Enter name");
     const newPlayer = {
@@ -24,7 +87,7 @@ const SetReviewPage = () => {
       country: isForeign ? "Foreign" : "India",
       isForeign: isForeign,
       basePrice: parseFloat(newPlayerPrice),
-      img: newPlayerImg || "" // Store empty string if no image provided
+      img: newPlayerImg || ""
     };
     addPlayerToSet(currentSetIndex, newPlayer);
     setNewPlayerName(""); setNewPlayerImg("");
@@ -32,6 +95,7 @@ const SetReviewPage = () => {
 
   const handleStartAuction = () => {
     setIsStarting(true);
+    setCurrentSetIndex(0);
     setTimeout(() => setCurrentPage('auction'), 2500);
   };
 
@@ -55,6 +119,7 @@ const SetReviewPage = () => {
           </div>
 
           <div style={{display: 'flex', gap: '20px', height: '100%'}}>
+            {/* LEFT: PLAYER LIST */}
             <div style={{flex: 2, overflowY: 'auto', maxHeight: '500px', border: '1px solid #eee', borderRadius: '10px'}}>
               <ul className="pool-list">
                 {currentSet.players.map(p => (
@@ -70,18 +135,42 @@ const SetReviewPage = () => {
               </ul>
             </div>
 
-            <div style={{flex: 1, background: '#f9fafb', padding: '20px', borderRadius: '10px'}}>
-              <h4>Add to {currentSet.setName}</h4>
-              <input type="text" placeholder="Name" value={newPlayerName} onChange={e => setNewPlayerName(e.target.value)} style={{width:'100%', marginBottom:'10px', padding:'8px'}}/>
-              <select value={newPlayerType} onChange={e => setNewPlayerType(e.target.value)} style={{width:'100%', marginBottom:'10px', padding:'8px'}}>
-                <option>Batsman</option><option>Bowler</option><option>All-Rounder</option><option>Wicket Keeper</option>
-              </select>
-              <input type="text" placeholder="Image URL (Optional)" value={newPlayerImg} onChange={e => setNewPlayerImg(e.target.value)} style={{width:'100%', marginBottom:'10px', padding:'8px'}}/>
-              <label style={{display:'flex', alignItems:'center', gap:'5px', marginBottom:'10px'}}>
-                <input type="checkbox" checked={isForeign} onChange={e => setIsForeign(e.target.checked)} style={{width:'auto'}} /> Foreign Player?
-              </label>
-              <input type="number" placeholder="Base Price" value={newPlayerPrice} onChange={e => setNewPlayerPrice(e.target.value)} style={{width:'100%', marginBottom:'10px', padding:'8px'}} />
-              <button className="primary-btn" onClick={handleAddPlayer}>+ Add Player</button>
+            {/* RIGHT COLUMN: ACTIONS CONTAINER */}
+            <div style={{flex: 1, display: 'flex', flexDirection: 'column', gap: '20px'}}>
+              
+              {/* SMART IMPORT SECTION */}
+              {/* <div style={{background: '#e0f2fe', padding: '20px', borderRadius: '10px', border:'1px solid #bae6fd'}}>
+                <h4 style={{marginTop:0, color:'#0369a1'}}>📂 Smart Bulk Import(csv)</h4>
+                <p style={{fontSize:'0.8rem', color:'#555'}}>
+                  <strong>Format:</strong> <code>Name, Set Name, Role, Country, Price, ImageURL</code>
+                </p>
+                <p style={{fontSize:'0.75rem', color:'#666', marginBottom:'10px'}}>
+                  <em>(e.g. "Virat Kohli, Marquee Players, Batsman, India, 200")</em><br/>
+                  If "Set Name" doesn't exist, it creates a new tab.
+                </p>
+                <input 
+                  type="file" 
+                  accept=".csv" 
+                  onChange={handleFileUpload} 
+                  style={{fontSize:'0.9rem', width:'100%'}}
+                />
+              </div> */}
+
+              {/* MANUAL ADD SECTION */}
+              <div style={{background: '#f9fafb', padding: '20px', borderRadius: '10px', border:'1px solid #eee'}}>
+                <h4 style={{marginTop:0}}>Add Single Player</h4>
+                <input type="text" placeholder="Name" value={newPlayerName} onChange={e => setNewPlayerName(e.target.value)} style={{width:'100%', marginBottom:'10px', padding:'8px'}}/>
+                <select value={newPlayerType} onChange={e => setNewPlayerType(e.target.value)} style={{width:'100%', marginBottom:'10px', padding:'8px'}}>
+                  <option>Batsman</option><option>Bowler</option><option>All-Rounder</option><option>Wicket Keeper</option>
+                </select>
+                <input type="text" placeholder="Image URL (Optional)" value={newPlayerImg} onChange={e => setNewPlayerImg(e.target.value)} style={{width:'100%', marginBottom:'10px', padding:'8px'}}/>
+                <label style={{display:'flex', alignItems:'center', gap:'5px', marginBottom:'10px'}}>
+                  <input type="checkbox" checked={isForeign} onChange={e => setIsForeign(e.target.checked)} style={{width:'auto'}} /> Foreign Player?
+                </label>
+                <input type="number" placeholder="Base Price" value={newPlayerPrice} onChange={e => setNewPlayerPrice(e.target.value)} style={{width:'100%', marginBottom:'10px', padding:'8px'}} />
+                <button className="primary-btn" onClick={handleAddPlayer}>+ Add Player</button>
+              </div>
+
             </div>
           </div>
           

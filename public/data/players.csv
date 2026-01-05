@@ -1,0 +1,119 @@
+Name,Set Name,Role,Country,Price,ImageURL
+Virat Kohli,Marquee1,Batsman,India,193,https://upload.wikimedia.org/wikipedia/commons/7/7e/Virat_Kohli.jpg
+Rohit Sharma,Marquee1,Batsman,India,190,https://upload.wikimedia.org/wikipedia/commons/6/6e/Rohit_Sharma.jpg
+Jos Buttler,Marquee1,Batsman,England,220,https://upload.wikimedia.org/wikipedia/commons/3/3c/Jos_Buttler.jpg
+Ben Stokes,Marquee2,AllRounder,England,214,https://upload.wikimedia.org/wikipedia/commons/4/4f/Ben_Stokes.jpg
+Pat Cummins,Marquee2,Bowler,Australia,208,https://upload.wikimedia.org/wikipedia/commons/2/2c/Pat_Cummins.jpg
+KL Rahul,Capped Batsman,Batsman,India,95,https://upload.wikimedia.org/wikipedia/commons/8/8c/KL_Rahul.jpg
+Shubman Gill,Capped Batsman,Batsman,India,105,https://upload.wikimedia.org/wikipedia/commons/0/02/Shubman_Gill.jpg
+David Warner,Capped Batsman,Batsman,Australia,94,https://upload.wikimedia.org/wikipedia/commons/1/1e/David_Warner_2019.jpg
+Kane Williamson,Capped Batsman 2,Batsman,New Zealand,119,https://upload.wikimedia.org/wikipedia/commons/7/7e/Kane_Williamson.jpg
+Hardik Pandya,Capped AllRounder,AllRounder,India,111,https://upload.wikimedia.org/wikipedia/commons/5/5d/Hardik_Pandya.jpg
+Ravindra Jadeja,Capped AllRounder,AllRounder,India,77,https://upload.wikimedia.org/wikipedia/commons/6/6e/Ravindra_Jadeja.jpg
+Andre Russell,Capped AllRounder2,AllRounder,West Indies,94,https://upload.wikimedia.org/wikipedia/commons/8/83/Andre_Russell.jpg
+Glenn Maxwell,Capped AllRounder2,AllRounder,Australia,98,https://upload.wikimedia.org/wikipedia/commons/3/3c/Glenn_Maxwell.jpg
+Jasprit Bumrah,Capped Bowler,Bowler,India,107,https://upload.wikimedia.org/wikipedia/commons/1/1e/Jasprit_Bumrah.jpg
+Mohammed Shami,Capped Bowler,Bowler,India,118,https://upload.wikimedia.org/wikipedia/commons/5/5c/Mohammed_Shami.jpg
+Trent Boult,Capped Bowler2,Bowler,New Zealand,107,https://upload.wikimedia.org/wikipedia/commons/3/3c/Trent_Boult.jpg
+Rashid Khan,Capped Bowler2,Bowler,Afghanistan,63,https://upload.wikimedia.org/wikipedia/commons/0/0c/Rashid_Khan.jpg
+Tilak Varma,Uncapped AllRounder,Bowler,India,47,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Rinku Singh,Uncapped Batsman,Bowler,India,50,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Yashasvi Jaiswal,Uncapped Batsman,Bowler,India,47,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Riyan Parag,Uncapped Batsman,AllRounder,India,49,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Abhishek Sharma,Uncapped Batsman,Bowler,India,28,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Umran Malik,Uncapped AllRounder,AllRounder,India,31,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Mayank Yadav,Uncapped Bowler,Bowler,India,46,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Mukesh Kumar,Uncapped Batsman,AllRounder,India,35,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Avesh Khan,Uncapped Batsman,Bowler,India,45,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Arshdeep Singh,Uncapped AllRounder,AllRounder,India,29,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Shivam Mavi,Uncapped Bowler,Bowler,India,50,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Washington Sundar,Uncapped Bowler,AllRounder,India,45,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Shahbaz Ahmed,Uncapped Batsman,Bowler,India,34,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Rahul Tewatia,Uncapped Batsman,AllRounder,India,38,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Mohsin Khan,Uncapped AllRounder,Bowler,India,47,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+KL Rahul,Capped Batsman,Batsman,India,102,https://upload.wikimedia.org/wikipedia/commons/8/8c/KL_Rahul.jpg
+Shubman Gill,Capped Batsman,Batsman,India,84,https://upload.wikimedia.org/wikipedia/commons/0/02/Shubman_Gill.jpg
+David Warner,Capped Batsman,Batsman,Australia,93,https://upload.wikimedia.org/wikipedia/commons/1/1e/David_Warner_2019.jpg
+Kane Williamson,Capped Batsman 2,Batsman,New Zealand,62,https://upload.wikimedia.org/wikipedia/commons/7/7e/Kane_Williamson.jpg
+Hardik Pandya,Capped AllRounder,AllRounder,India,84,https://upload.wikimedia.org/wikipedia/commons/5/5d/Hardik_Pandya.jpg
+Ravindra Jadeja,Capped AllRounder,AllRounder,India,80,https://upload.wikimedia.org/wikipedia/commons/6/6e/Ravindra_Jadeja.jpg
+Andre Russell,Capped AllRounder2,AllRounder,West Indies,60,https://upload.wikimedia.org/wikipedia/commons/8/83/Andre_Russell.jpg
+Glenn Maxwell,Capped AllRounder2,AllRounder,Australia,113,https://upload.wikimedia.org/wikipedia/commons/3/3c/Glenn_Maxwell.jpg
+Jasprit Bumrah,Capped Bowler,Bowler,India,109,https://upload.wikimedia.org/wikipedia/commons/1/1e/Jasprit_Bumrah.jpg
+Mohammed Shami,Capped Bowler,Bowler,India,86,https://upload.wikimedia.org/wikipedia/commons/5/5c/Mohammed_Shami.jpg
+Trent Boult,Capped Bowler2,Bowler,New Zealand,112,https://upload.wikimedia.org/wikipedia/commons/3/3c/Trent_Boult.jpg
+Rashid Khan,Capped Bowler2,Bowler,Afghanistan,99,https://upload.wikimedia.org/wikipedia/commons/0/0c/Rashid_Khan.jpg
+Tilak Varma,Uncapped Batsman,Batsman,India,48,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Rinku Singh,Uncapped Batsman,Batsman,India,37,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Yashasvi Jaiswal,Uncapped Bowler,Bowler,India,25,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Riyan Parag,Uncapped Bowler,Bowler,India,43,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Abhishek Sharma,Uncapped Bowler,Batsman,India,48,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Umran Malik,Uncapped Bowler,Bowler,India,43,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Mayank Yadav,Uncapped Bowler,AllRounder,India,47,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Mukesh Kumar,Uncapped Bowler,Batsman,India,40,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Avesh Khan,Uncapped AllRounder,Bowler,India,21,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Arshdeep Singh,Uncapped Batsman,Batsman,India,24,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Shivam Mavi,Uncapped Bowler,Bowler,India,22,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Washington Sundar,Uncapped AllRounder,Bowler,India,32,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Shahbaz Ahmed,Uncapped Bowler,Batsman,India,38,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Rahul Tewatia,Uncapped Batsman,Bowler,India,44,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Mohsin Khan,Uncapped AllRounder,AllRounder,India,21,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Hardik Pandya,Capped AllRounder,AllRounder,India,60,https://upload.wikimedia.org/wikipedia/commons/5/5d/Hardik_Pandya.jpg
+Ravindra Jadeja,Capped AllRounder,AllRounder,India,111,https://upload.wikimedia.org/wikipedia/commons/6/6e/Ravindra_Jadeja.jpg
+Andre Russell,Capped AllRounder2,AllRounder,West Indies,76,https://upload.wikimedia.org/wikipedia/commons/8/83/Andre_Russell.jpg
+Glenn Maxwell,Capped AllRounder2,AllRounder,Australia,109,https://upload.wikimedia.org/wikipedia/commons/3/3c/Glenn_Maxwell.jpg
+Jasprit Bumrah,Capped Bowler,Bowler,India,93,https://upload.wikimedia.org/wikipedia/commons/1/1e/Jasprit_Bumrah.jpg
+Mohammed Shami,Capped Bowler,Bowler,India,86,https://upload.wikimedia.org/wikipedia/commons/5/5c/Mohammed_Shami.jpg
+Trent Boult,Capped Bowler2,Bowler,New Zealand,92,https://upload.wikimedia.org/wikipedia/commons/3/3c/Trent_Boult.jpg
+Rashid Khan,Capped Bowler2,Bowler,Afghanistan,103,https://upload.wikimedia.org/wikipedia/commons/0/0c/Rashid_Khan.jpg
+Tilak Varma,Uncapped AllRounder,AllRounder,India,45,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Rinku Singh,Uncapped Batsman,AllRounder,India,49,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Yashasvi Jaiswal,Uncapped AllRounder,Bowler,India,47,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Riyan Parag,Uncapped AllRounder,Batsman,India,27,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Abhishek Sharma,Uncapped Batsman,Batsman,India,24,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Umran Malik,Uncapped AllRounder,AllRounder,India,26,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Mayank Yadav,Uncapped Batsman,AllRounder,India,29,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Mukesh Kumar,Uncapped AllRounder,Bowler,India,39,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Avesh Khan,Uncapped AllRounder,AllRounder,India,39,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Arshdeep Singh,Uncapped Batsman,AllRounder,India,48,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Shivam Mavi,Uncapped Bowler,AllRounder,India,48,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Washington Sundar,Uncapped AllRounder,Batsman,India,24,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Shahbaz Ahmed,Uncapped Bowler,Bowler,India,25,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Rahul Tewatia,Uncapped AllRounder,Bowler,India,43,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Mohsin Khan,Uncapped AllRounder,AllRounder,India,30,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Hardik Pandya,Capped AllRounder,AllRounder,India,83,https://upload.wikimedia.org/wikipedia/commons/5/5d/Hardik_Pandya.jpg
+Ravindra Jadeja,Capped AllRounder,AllRounder,India,106,https://upload.wikimedia.org/wikipedia/commons/6/6e/Ravindra_Jadeja.jpg
+Andre Russell,Capped AllRounder2,AllRounder,West Indies,86,https://upload.wikimedia.org/wikipedia/commons/8/83/Andre_Russell.jpg
+Glenn Maxwell,Capped AllRounder2,AllRounder,Australia,115,https://upload.wikimedia.org/wikipedia/commons/3/3c/Glenn_Maxwell.jpg
+Jasprit Bumrah,Capped Bowler,Bowler,India,110,https://upload.wikimedia.org/wikipedia/commons/1/1e/Jasprit_Bumrah.jpg
+Mohammed Shami,Capped Bowler,Bowler,India,63,https://upload.wikimedia.org/wikipedia/commons/5/5c/Mohammed_Shami.jpg
+Trent Boult,Capped Bowler2,Bowler,New Zealand,72,https://upload.wikimedia.org/wikipedia/commons/3/3c/Trent_Boult.jpg
+Rashid Khan,Capped Bowler2,Bowler,Afghanistan,69,https://upload.wikimedia.org/wikipedia/commons/0/0c/Rashid_Khan.jpg
+Tilak Varma,Uncapped AllRounder,Batsman,India,26,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Rinku Singh,Uncapped Batsman,Bowler,India,38,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Yashasvi Jaiswal,Uncapped Bowler,AllRounder,India,35,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Riyan Parag,Uncapped Batsman,Batsman,India,31,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Abhishek Sharma,Uncapped AllRounder,Bowler,India,39,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Umran Malik,Uncapped AllRounder,AllRounder,India,28,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Mayank Yadav,Uncapped Bowler,Bowler,India,21,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Mukesh Kumar,Uncapped Bowler,Bowler,India,48,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Avesh Khan,Uncapped Batsman,AllRounder,India,43,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Arshdeep Singh,Uncapped Batsman,Bowler,India,30,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Shivam Mavi,Uncapped Batsman,AllRounder,India,50,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Washington Sundar,Uncapped Bowler,Bowler,India,31,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Shahbaz Ahmed,Uncapped Bowler,Bowler,India,49,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Rahul Tewatia,Uncapped Bowler,AllRounder,India,26,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Mohsin Khan,Uncapped Batsman,Bowler,India,31,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Hardik Pandya,Capped AllRounder,AllRounder,India,70,https://upload.wikimedia.org/wikipedia/commons/5/5d/Hardik_Pandya.jpg
+Ravindra Jadeja,Capped AllRounder,AllRounder,India,97,https://upload.wikimedia.org/wikipedia/commons/6/6e/Ravindra_Jadeja.jpg
+Andre Russell,Capped AllRounder2,AllRounder,West Indies,111,https://upload.wikimedia.org/wikipedia/commons/8/83/Andre_Russell.jpg
+Glenn Maxwell,Capped AllRounder2,AllRounder,Australia,108,https://upload.wikimedia.org/wikipedia/commons/3/3c/Glenn_Maxwell.jpg
+Jasprit Bumrah,Capped Bowler,Bowler,India,75,https://upload.wikimedia.org/wikipedia/commons/1/1e/Jasprit_Bumrah.jpg
+Mohammed Shami,Capped Bowler,Bowler,India,118,https://upload.wikimedia.org/wikipedia/commons/5/5c/Mohammed_Shami.jpg
+Trent Boult,Capped Bowler2,Bowler,New Zealand,76,https://upload.wikimedia.org/wikipedia/commons/3/3c/Trent_Boult.jpg
+Rashid Khan,Capped Bowler2,Bowler,Afghanistan,119,https://upload.wikimedia.org/wikipedia/commons/0/0c/Rashid_Khan.jpg
+Tilak Varma,Uncapped AllRounder,AllRounder,India,50,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Rinku Singh,Uncapped Bowler,Batsman,India,38,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Yashasvi Jaiswal,Uncapped Bowler,AllRounder,India,22,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Riyan Parag,Uncapped Batsman,Batsman,India,21,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
+Abhishek Sharma,Uncapped AllRounder,AllRounder,India,37,https://upload.wikimedia.org/wikipedia/commons/placeholder.jpg
