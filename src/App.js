@@ -1,24 +1,29 @@
-import logo from './logo.svg';
+import React from 'react';
+import { AuctionProvider, useAuction } from './context/AuctionContext';
+import LandingPage from './components/LandingPage';
+import SetReviewPage from './components/SetReviewPage';
+import AuctionPage from './components/AuctionPage';
+import SummaryPage from './components/SummaryPage';
 import './App.css';
+
+const GameController = () => {
+  const { currentPage } = useAuction();
+
+  // Simple Router Switch
+  switch(currentPage) {
+    case 'landing': return <LandingPage />;
+    case 'review': return <SetReviewPage />;
+    case 'auction': return <AuctionPage />;
+    case 'summary': return <SummaryPage />;
+    default: return <LandingPage />;
+  }
+};
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <AuctionProvider>
+      <GameController />
+    </AuctionProvider>
   );
 }
 

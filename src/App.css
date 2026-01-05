@@ -1,38 +1,360 @@
-.App {
+/* src/App.css */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  margin: 0;
+  padding: 20px;
+  color: #333;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* --- ANIMATIONS --- */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes hitSix { 0% { transform: translateX(0) translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateX(150px) translateY(-200px) rotate(360deg); opacity: 0; } }
+@keyframes bowled { 0% { transform: translateX(-150px) translateY(0); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateX(100px) translateY(150px); opacity: 0; } }
+
+/* --- LANDING PAGE --- */
+.landing-page {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: fadeIn 0.4s ease-out;
+}
+
+.header { text-align: center; margin-bottom: 30px; }
+.header h1 { color: #667eea; margin: 0; font-size: 2.5rem; }
+.header p { color: #666; }
+
+.section-title {
+  border-bottom: 2px solid #667eea;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.teams-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.team-btn {
+  padding: 15px;
+  border: 2px solid #eee;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s;
   text-align: center;
 }
+.team-btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+.team-btn strong { display: block; font-size: 1.2rem; margin-bottom: 5px; }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+/* Custom Team Input */
+.custom-team-input {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+.custom-team-input input { flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ddd;}
+
+.setup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.form-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.9rem; }
+.form-group input { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; }
+
+.primary-btn {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.primary-btn:hover { transform: scale(1.02); }
+.primary-btn:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+
+/* --- POOL PAGE --- */
+.pool-container {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 20px;
+  height: 70vh;
+}
+.pool-card {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+}
+.pool-list { overflow-y: auto; flex: 1; list-style: none; padding: 0; }
+.pool-item {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+}
+.nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+.nav-btn { background: #667eea; color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; }
+
+/* --- AUCTION PAGE --- */
+.auction-layout {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 25px;
+  margin-top: 20px;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+/* Left: Player Card */
+.player-card-section {
+  background: linear-gradient(135deg, #f8f9fa 0%, #f0f0f0 100%);
+  border-radius: 15px;
+  padding: 30px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  min-height: 450px;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  order: 2;
+}
+
+.player-avatar {
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 50px;
+  border: 4px solid #667eea;
+  margin-bottom: 15px;
+}
+.player-details h2 { margin: 10px 0; color: #333; }
+.badge { padding: 5px 10px; border-radius: 15px; font-size: 0.8rem; margin: 0 5px; }
+.badge.role { background: #e0e7ff; color: #4c1d95; }
+.badge.country { background: #fbbf24; color: #78350f; }
+
+/* Animation Emojis */
+.cricket-emoji { position: absolute; font-size: 80px; animation: hitSix 1s ease-in-out forwards; }
+.ball-emoji { position: absolute; font-size: 80px; animation: bowled 1.5s ease-in-out forwards; animation-delay: 0.2s; }
+
+/* Center: Controls */
+.auction-controls {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  order : 1;
+}
+.control-row { margin-bottom: 15px; }
+.control-row select, .control-row input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem; }
+
+.action-btns { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
+.btn-sold { background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+.btn-unsold { background: linear-gradient(135deg, #f87171 0%, #dc2626 100%); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+.btn-finish { width: 100%; margin-top: 20px; background: #f59e0b; color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+.btn-finish:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; }
+
+/* Right: Stats */
+.team-stats-panel {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  max-height: 600px;
+  overflow-y: auto;
+  order: 3;
+}
+.mini-team-card {
+  padding: 10px;
+  border-radius: 8px;
+  background: #f8f9fa;
+  margin-bottom: 10px;
+  border-left: 4px solid #ccc;
+  font-size: 0.9rem;
+}
+.progress-bar { height: 6px; background: #eee; border-radius: 3px; margin-top: 5px; overflow: hidden; }
+.progress-fill { height: 100%; background: #667eea; }
+
+/* Transition Overlay */
+.transition-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.9);
   color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.5s;
+}
+.pulsate { animation: pulse 1s infinite; font-size: 3rem; }
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+/* --- CARD FLIP ANIMATION --- */
+.card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+  perspective: 1000px; /* Essential for 3D effect */
+  margin-bottom: 20px;
 }
 
-.App-link {
-  color: #61dafb;
+.mystery-card {
+  width: 80px;
+  height: 110px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s;
+  cursor: pointer;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.mystery-card.flipped {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden; /* Hides the back when flipped */
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.card-front {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: 2px solid #fff;
+}
+
+/* The Logo or Pattern on the back of the card */
+.card-logo {
+  font-size: 2rem;
+  color: rgba(255,255,255,0.3);
+}
+
+.card-back {
+  background: white;
+  transform: rotateY(180deg);
+  border: 2px solid #667eea;
+}
+
+.card-back img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+/* Zoom effect when a card is selected */
+@keyframes zoomToCenter {
+  0% { transform: scale(1) rotateY(180deg); opacity: 1; }
+  100% { transform: scale(3); opacity: 0; } /* Fades out as it zooms */
+}
+
+.mystery-card.zooming {
+  animation: zoomToCenter 0.8s forwards;
+  z-index: 100;
+}
+
+
+/* --- SPIN WHEEL ANIMATION --- */
+.wheel-container {
+  position: relative;
+  width: 320px;
+  height: 320px;
+  margin: 0 auto 30px;
+}
+
+.wheel {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 8px solid white;
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+  transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); /* Custom easing for realistic spin */
+  position: relative;
+  overflow: hidden;
+}
+
+/* The Arrow/Pointer - Fixed at TOP (12 o'clock) */
+.wheel-arrow {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0; 
+  height: 0; 
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent; 
+  border-top: 30px solid #e94560; /* Red Pointer */
+  z-index: 10;
+  filter: drop-shadow(0 4px 2px rgba(0,0,0,0.2));
+} 
+
+.wheel-center {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50px; height: 50px;
+  background: white;
+  border-radius: 50%;
+  z-index: 5;
+  border: 4px solid #667eea;
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+} 
+
+/* Text Labels inside the wheel */
+.wheel-label {
+  position: absolute;
+  top: 0;
+  left: 50%; 
+  transform-origin: 50% 100%; /* Pivot from the center of the wheel */
+  height: 50%; /* Reaches from top to center */
+  width: 1px; /* Minimal width, we center text relative to this line */
+  padding-top: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+  pointer-events: none;
+  display: flex; 
+  justify-content: center; /* Centers text horizontally on the pivot line */
+}
+
+.wheel-label span {
+  white-space: nowrap;
+  transform: translateX(-50%); /* Center the text on the line */
 }
