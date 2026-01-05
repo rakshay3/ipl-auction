@@ -119,7 +119,7 @@ const AuctionPage = () => {
     <div className="container">
       <div className="header" style={{display:'flex', justifyContent:'space-between', alignItems:'end', marginBottom:'20px'}}>
         <div><h1 style={{margin:0}}>🔨 Live Auction</h1><p style={{margin:0}}>Set: {currentSet.setName}</p></div>
-        <button onClick={handleQuit} style={{background:'#fee2e2', color:'#991b1b', border:'none', padding:'5px 10px', borderRadius:'5px'}}>Quit</button>
+        <button onClick={handleQuit} style={{background:'#fee2e2', color:'#991b1b', border:'none', padding:'5px 10px', borderRadius:'5px',cursor:'pointer', fontSize:'0.9rem', fontWeight:'bold'}}>✖ Quit Game</button>
       </div>
 
       <div className="auction-layout" style={{gridTemplateColumns: '1fr 2fr 1fr'}}>
