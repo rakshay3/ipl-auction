@@ -4,6 +4,7 @@ import LandingPage from './components/LandingPage';
 import SetReviewPage from './components/SetReviewPage';
 import AuctionPage from './components/AuctionPage';
 import SummaryPage from './components/SummaryPage';
+import SelectionPage from './components/SelectionPage';
 import './App.css';
 
 const GameController = () => {
@@ -12,6 +13,7 @@ const GameController = () => {
   // Simple Router Switch
   switch(currentPage) {
     case 'landing': return <LandingPage />;
+    case 'selection': return <SelectionPage />;
     case 'review': return <SetReviewPage />;
     case 'auction': return <AuctionPage />;
     case 'summary': return <SummaryPage />;

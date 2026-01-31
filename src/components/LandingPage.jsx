@@ -12,7 +12,7 @@ const LandingPage = () => {
   const [saveExists, setSaveExists] = useState(false);
 
   const [settings, setSettings] = useState({
-    budget: 10000, minPlayers: 15, maxPlayers: 25, maxForeign: 8
+    budget: 100, minPlayers: 15, maxPlayers: 25, maxForeign: 8
   });
 
   useEffect(() => {
@@ -35,7 +35,8 @@ const LandingPage = () => {
       const newTeam = {
         id: `custom-${Date.now()}`,
         name: newTeamName,
-        abbr: newTeamName.substring(0,3).toUpperCase(),
+        // abbr: newTeamName.substring(0,3).toUpperCase(),
+        abbr: newTeamName.split(" ").map(word => word[0]).join("").toUpperCase(),
         color: newTeamColor
       };
       setCustomTeams([...customTeams, newTeam]);
@@ -66,7 +67,7 @@ const LandingPage = () => {
   return (
     <div className="container landing-page">
       <div className="header">
-        <h1>🏏 IPL Auction Game v1.2</h1>
+        <h1>🏏 IPL Auction Game v1</h1>
         <p>Configure your auction parameters</p>
       </div>
 
@@ -115,7 +116,7 @@ const LandingPage = () => {
         <div className="setup-section">
           <h3 className="section-title">Step 2: Rules</h3>
           <div className="setup-grid">
-            <div className="form-group"><label>Budget (Lakhs)</label><input type="number" value={settings.budget} onChange={e => setSettings({...settings, budget: e.target.value})} /></div>
+            <div className="form-group"><label>Budget (Crore)</label><input type="number" value={settings.budget} onChange={e => setSettings({...settings, budget: e.target.value})} /></div>
             <div className="form-group"><label>Min Players</label><input type="number" value={settings.minPlayers} onChange={e => setSettings({...settings, minPlayers: e.target.value})} /></div>
             <div className="form-group"><label>Max Players</label><input type="number" value={settings.maxPlayers} onChange={e => setSettings({...settings, maxPlayers: e.target.value})} /></div>
             <div className="form-group"><label>Max Foreign</label><input type="number" value={settings.maxForeign} onChange={e => setSettings({...settings, maxForeign: e.target.value})} /></div>
