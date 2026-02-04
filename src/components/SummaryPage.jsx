@@ -106,11 +106,11 @@ const SummaryPage = () => {
             <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '15px', background: '#f8f9fa', padding: '10px', borderRadius: '8px'}}>
               <div style={{textAlign: 'center'}}>
                 <div style={{fontSize: '0.75rem', color: '#666', textTransform: 'uppercase'}}>Spent</div>
-                <div style={{fontWeight: 'bold', fontSize: '1.1rem', color: '#d97706'}}>{team.spent || 0}L</div>
+                <div style={{fontWeight: 'bold', fontSize: '1.1rem', color: '#d97706'}}>{team.spent || 0}Cr</div>
               </div>
               <div style={{textAlign: 'center'}}>
                 <div style={{fontSize: '0.75rem', color: '#666', textTransform: 'uppercase'}}>Left</div>
-                <div style={{fontWeight: 'bold', fontSize: '1.1rem', color: '#16a34a'}}>{team.budget || 0}L</div>
+                <div style={{fontWeight: 'bold', fontSize: '1.1rem', color: '#16a34a'}}>{team.budget || 0}Cr</div>
               </div>
               <div style={{textAlign: 'center'}}>
                 <div style={{fontSize: '0.75rem', color: '#666', textTransform: 'uppercase'}}>Foreign</div>
@@ -138,7 +138,7 @@ const SummaryPage = () => {
                     color: '#333'
                   }}>
                     <span>{p.name}</span>
-                    <strong style={{color: '#667eea'}}>{p.soldPrice}L</strong>
+                    <strong style={{color: '#667eea'}}>{p.soldPrice}Cr</strong>
                   </li>
                 ))
               ) : (
