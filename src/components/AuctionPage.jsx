@@ -6,7 +6,7 @@ const AuctionPage = () => {
   const { 
     playerSets, activeTeams, config, sellPlayer, markUnsold, 
     setCurrentPage, unsoldPlayers, startUnsoldRound, canFinishAuction,
-    currentSetIndex, setCurrentSetIndex, resetGame 
+    currentSetIndex, setCurrentSetIndex, resetGame, deletePlayerFromSet, deleteSet 
   } = useAuction();
 
   // STATES
@@ -288,41 +288,124 @@ const AuctionPage = () => {
              })}
 
              {/* SETS LIST */}
-             {activeTab === 'setList' && (
-               <div>
-                 <div style={{background:'#f0f9ff', padding:'5px', borderRadius:'5px', marginBottom:'5px'}}>
-                   <strong>Current: {currentSet.setName}</strong>
-                 </div>
-                 <ul style={{listStyle:'none', padding:0, marginBottom:'15px'}}>
-                   {currentSet?.players.map(p => <li key={p.id} style={{padding:'5px', borderBottom:'1px solid #eee', fontSize:'0.85rem'}}>{p.name}</li>)}
-                 </ul>
-                 <div style={{background:'#fdf2f8', padding:'5px', borderRadius:'5px', marginBottom:'5px'}}>
-                   <strong>Upcoming Sets</strong>
-                 </div>
-                 <ul style={{listStyle:'none', padding:0}}>
-                   {playerSets.map((s, idx) => {
-                     if (idx > currentSetIndex && s.players.length > 0) {
-                       const isOpen = expandedSetId === idx;
-                       return (
-                         <li key={idx} style={{marginBottom:'5px'}}>
-                           <div onClick={() => toggleSet(idx)} style={{padding:'6px 8px', border:'1px solid #f9a8d4', background: isOpen ? '#fce7f3' : 'white', color:'#831843', fontSize:'0.85rem', display:'flex', justifyContent:'space-between', borderRadius: '5px', cursor: 'pointer'}}>
-                             <span>{isOpen ? '▼' : '▶'} {s.setName}</span>
-                             <span style={{background:'#fbcfe8', padding:'0 6px', borderRadius:'10px', fontSize:'0.75rem'}}>{s.players.length}</span>
-                           </div>
-                           {isOpen && (
-                             <ul style={{listStyle:'none', padding:'5px 0 5px 15px', margin:0, background:'#fff0f7', borderLeft:'2px solid #f9a8d4'}}>
-                               {s.players.map(p => <li key={p.id} style={{fontSize:'0.8rem', padding:'3px 0', color:'#555'}}>• {p.name}</li>)}
-                             </ul>
-                           )}
-                         </li>
-                       );
-                     }
-                     return null;
-                   })}
-                 </ul>
-               </div>
-             )}
+            {activeTab === 'setList' && (
+              <div>
+                
+                {/* SECTION: CURRENT SET (ReadOnly Set Name, but Editable Players) */}
+                <div style={{background:'#eff6ff', padding:'8px', borderRadius:'6px', marginBottom:'10px', border:'1px solid #bfdbfe'}}>
+                  <strong style={{color:'#1e3a8a', display:'block', marginBottom:'5px'}}>🟢 Current: {currentSet.setName}</strong>
+                  <ul style={{listStyle:'none', padding:0, margin:0}}>
+                    {currentSet?.players.length > 0 ? (
+                      currentSet.players.map(p => (
+                        <li key={p.id} style={{padding:'4px 0', borderBottom:'1px solid #e5e7eb', fontSize:'0.85rem', color:'#374151', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                            <span>{p.name}</span>
+                            {/* Delete Player Button */}
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if(window.confirm(`Remove ${p.name}?`)) deletePlayerFromSet(currentSetIndex, p.id);
+                              }}
+                              style={{border:'none', background:'transparent', cursor:'pointer', fontSize:'0.8rem'}}
+                              title="Remove Player"
+                            >
+                              ❌
+                            </button>
+                        </li>
+                      ))
+                    ) : (
+                      <li style={{fontSize:'0.8rem', color:'#9ca3af', fontStyle:'italic'}}>Set Finished</li>
+                    )}
+                  </ul>
+                </div>
 
+                {/* SECTION: UPCOMING SETS (Fully Deletable) */}
+                <div style={{background:'#fdf2f8', padding:'8px', borderRadius:'6px', border:'1px solid #fbcfe8'}}>
+                  <strong style={{color:'#be185d', display:'block', marginBottom:'5px'}}>🔜 Upcoming Sets</strong>
+                  <ul style={{listStyle:'none', padding:0, margin:0}}>
+                    {playerSets.map((s, idx) => {
+                      // Only show future sets
+                      if (idx > currentSetIndex) {
+                        const isOpen = expandedSetId === idx;
+                        return (
+                          <li key={idx} style={{marginBottom:'5px'}}>
+                            {/* SET HEADER */}
+                            <div 
+                              style={{
+                                padding:'6px 8px', 
+                                border:'1px solid #f9a8d4', 
+                                background: isOpen ? '#fce7f3' : 'white',
+                                color:'#831843', 
+                                fontSize:'0.85rem', 
+                                display:'flex', 
+                                justifyContent:'space-between',
+                                alignItems:'center',
+                                borderRadius: '5px',
+                                cursor: 'pointer',
+                                transition: 'background 0.2s'
+                              }}
+                              onClick={() => toggleSet(idx)}
+                            >
+                              <div style={{display:'flex', alignItems:'center', gap:'5px'}}>
+                                <span>{isOpen ? '▼' : '▶'} {s.setName}</span>
+                                <span style={{background:'#fbcfe8', padding:'0 6px', borderRadius:'10px', fontSize:'0.75rem'}}>
+                                  {s.players.length}
+                                </span>
+                              </div>
+
+                              {/* DELETE ENTIRE SET BUTTON */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation(); // Prevent toggling accordion
+                                  if(window.confirm(`Delete entire set: "${s.setName}"?`)) deleteSet(idx); // Use new deleteSet function
+                                }}
+                                style={{
+                                  background: '#fee2e2', color:'#ef4444', border:'none', 
+                                  borderRadius:'4px', padding:'2px 6px', fontSize:'0.7rem', cursor:'pointer'
+                                }}
+                                title="Delete Entire Set"
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                            
+                            {/* EXPANDED PLAYER LIST */}
+                            {isOpen && (
+                              <ul style={{
+                                listStyle:'none', 
+                                padding:'5px 0 5px 15px', 
+                                margin:0, 
+                                background:'#fff0f7',
+                                borderLeft:'2px solid #f9a8d4'
+                              }}>
+                                {s.players.map(p => (
+                                  <li key={p.id} style={{fontSize:'0.8rem', padding:'3px 0', color:'#555', display:'flex', justifyContent:'space-between', paddingRight:'10px'}}>
+                                    <span>• {p.name}</span>
+                                    {/* DELETE PLAYER FROM UPCOMING SET */}
+                                    <button 
+                                      onClick={() => {
+                                        if(window.confirm(`Remove ${p.name}?`)) deletePlayerFromSet(idx, p.id);
+                                      }}
+                                      style={{border:'none', background:'transparent', cursor:'pointer', color:'#ef4444', fontSize:'0.7rem'}}
+                                    >
+                                      ❌
+                                    </button>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </li>
+                        );
+                      }
+                      return null;
+                    })}
+                    
+                    {currentSetIndex >= playerSets.length - 1 && (
+                      <li style={{color:'#9ca3af', fontSize:'0.8rem', padding:'5px', fontStyle:'italic'}}>No more sets coming up.</li>
+                    )}
+                  </ul>
+                </div>
+              </div>
+            )}
              {/* UNSOLD LIST */}
              {activeTab === 'unsoldList' && (
                <ul style={{listStyle:'none', padding:0}}>

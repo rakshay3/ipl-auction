@@ -84,14 +84,24 @@ export const AuctionProvider = ({ children }) => {
   const removePlayerFromSet = (playerId) => { const updatedSets = playerSets.map(set => ({ ...set, players: set.players.filter(p => p.id !== playerId) })).filter(set => set.players.length > 0); setPlayerSets(updatedSets); };
   const startUnsoldRound = () => { if (unsoldPlayers.length === 0) return false; const unsoldSet = { setName: "Re-Auction: Unsold Players", players: [...unsoldPlayers] }; setPlayerSets([unsoldSet]); setUnsoldPlayers([]); return true; };
   const canFinishAuction = () => { if (activeTeams.length === 0) return false; return activeTeams.every(team => team.squad.length >= config.minPlayers); };
-
+  const deleteSet = (index) => {
+      // Prevent deleting the currently active set to avoid crashing the game loop
+      if (index === currentSetIndex) {
+        alert("⚠️ Cannot delete the currently active set! Finish or skip it instead.");
+        return;
+      }
+      
+      // Filter out the set at the specific index
+      const updatedSets = playerSets.filter((_, i) => i !== index);
+      setPlayerSets(updatedSets);
+    };
   return (
     <AuctionContext.Provider value={{
       config, setConfig, activeTeams, setActiveTeams, playerSets, setPlayerSets, unsoldPlayers,
       currentPage, setCurrentPage, currentSetIndex, setCurrentSetIndex,
       initializeGame, importPlayersBulk, // Exported
       addPlayerToSet, deletePlayerFromSet, sellPlayer, markUnsold, startUnsoldRound, canFinishAuction,
-      resetGame, hasSavedGame
+      resetGame, hasSavedGame, deleteSet
     }}>
       {children}
     </AuctionContext.Provider>
