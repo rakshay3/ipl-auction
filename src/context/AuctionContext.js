@@ -1,107 +1,155 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { initialPlayerSets } from '../data/initialPlayers'; 
+import { io } from 'socket.io-client';
 
 const AuctionContext = createContext();
 
+const SOCKET_URL = 'http://localhost:4000'; 
+
 export const AuctionProvider = ({ children }) => {
-  const loadState = (key, fallback) => {
-    const saved = localStorage.getItem(key);
-    return saved ? JSON.parse(saved) : fallback;
-  };
-
-  const [config, setConfig] = useState(() => loadState('ipl_config', {
-    budget: 10000, minPlayers: 15, maxPlayers: 25, maxForeign: 8
-  }));
-
-  const [activeTeams, setActiveTeams] = useState(() => loadState('ipl_activeTeams', []));
+  const [socket, setSocket] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
   
-  // NOTE: Initialize with empty set structure, NOT loading from CSV automatically anymore
-  const [playerSets, setPlayerSets] = useState(() => loadState('ipl_playerSets', initialPlayerSets));
+  // STATE
+  const [roomId, setRoomId] = useState(null);
+  const [isHost, setIsHost] = useState(false);
   
-  const [unsoldPlayers, setUnsoldPlayers] = useState(() => loadState('ipl_unsoldPlayers', []));
-  const [currentPage, setCurrentPage] = useState(() => loadState('ipl_currentPage', 'landing'));
-  const [currentSetIndex, setCurrentSetIndex] = useState(() => loadState('ipl_setIndex', 0));
+  // Game Data
+  const [config, setConfig] = useState({ budget: 100, minPlayers: 15, maxPlayers: 25, maxForeign: 8 });
+  const [activeTeams, setActiveTeams] = useState([]);
+  const [customTeams, setCustomTeams] = useState([]); 
+  const [connectedUsers, setConnectedUsers] = useState([]);
+  const [playerSets, setPlayerSets] = useState([]);
+  const [unsoldPlayers, setUnsoldPlayers] = useState([]);
+  const [currentPage, setCurrentPage] = useState('landing');
+  const [currentSetIndex, setCurrentSetIndex] = useState(0);
+  
+  // Auction Status
+  const [currentAuctionState, setCurrentAuctionState] = useState({
+    currentPlayer: null,
+    currentBid: 0,
+    currentBidder: null,
+    timer: 60,
+    status: 'IDLE'
+  });
 
-  // --- AUTO-SAVE EFFECT (Keep this) ---
   useEffect(() => {
-    localStorage.setItem('ipl_config', JSON.stringify(config));
-    localStorage.setItem('ipl_activeTeams', JSON.stringify(activeTeams));
-    localStorage.setItem('ipl_playerSets', JSON.stringify(playerSets));
-    localStorage.setItem('ipl_unsoldPlayers', JSON.stringify(unsoldPlayers));
-    localStorage.setItem('ipl_currentPage', JSON.stringify(currentPage));
-    localStorage.setItem('ipl_setIndex', JSON.stringify(currentSetIndex));
-  }, [config, activeTeams, playerSets, unsoldPlayers, currentPage, currentSetIndex]);
+    const newSocket = io(SOCKET_URL);
+    setSocket(newSocket);
+
+    newSocket.on('connect', () => {
+      console.log('🟢 Connected:', newSocket.id);
+      setIsConnected(true);
+    });
+
+    newSocket.on('disconnect', () => setIsConnected(false));
+
+    // MAIN LISTENER
+    newSocket.on('STATE_UPDATE', (serverState) => {
+      // console.log("📥 Update:", serverState);
+      
+      if(serverState.config) setConfig(serverState.config);
+      if(serverState.activeTeams) setActiveTeams(serverState.activeTeams);
+      if(serverState.customTeams) setCustomTeams(serverState.customTeams); // <--- SYNC
+      if(serverState.connectedUsers) setConnectedUsers(serverState.connectedUsers);
+      if(serverState.playerSets) setPlayerSets(serverState.playerSets);
+      if(serverState.unsoldPlayers) setUnsoldPlayers(serverState.unsoldPlayers);
+      if(serverState.currentPage) setCurrentPage(serverState.currentPage);
+      
+      setCurrentAuctionState({
+        currentPlayer: serverState.currentPlayer,
+        currentBid: serverState.currentBid,
+        currentBidder: serverState.currentBidder,
+        timer: serverState.timer,
+        status: serverState.auctionStatus
+      });
+    });
+
+    newSocket.on('ERROR_MSG', (msg) => alert(`⚠️ ${msg}`));
+
+    return () => newSocket.close();
+  }, []);
 
   // --- ACTIONS ---
 
+  const joinGame = (code, name, host = false) => {
+    if (!socket) return;
+    setRoomId(code);
+    setIsHost(host);
+    socket.emit('JOIN_ROOM', { roomId: code, userName: name, isHost: host });
+  };
+
+  const updateSettings = (newConfig) => {
+    if(!socket) return;
+    socket.emit('UPDATE_SETTINGS', { roomId, config: newConfig });
+  };
+
+  const claimTeam = (team) => {
+    if(!socket) return;
+    socket.emit('CLAIM_TEAM', { roomId, team });
+  };
+
+  const addCustomTeam = (team) => {
+    if(!socket) return;
+    socket.emit('ADD_CUSTOM_TEAM', { roomId, team });
+  };
+
+  const startGame = () => {
+    if(!socket) return;
+    socket.emit('START_GAME', { roomId });
+  };
+
   const importPlayersBulk = (entries) => {
-    const updatedSets = []; // Reset sets when importing new data
+    const updatedSets = [];
     entries.forEach(entry => {
       const { targetSetName, player } = entry;
       let setIndex = updatedSets.findIndex(s => s.setName.toLowerCase() === targetSetName.toLowerCase());
-      if (setIndex !== -1) {
-        updatedSets[setIndex].players.push(player);
-      } else {
-        updatedSets.push({ setName: targetSetName, players: [player] });
-      }
+      if (setIndex !== -1) updatedSets[setIndex].players.push(player);
+      else updatedSets.push({ setName: targetSetName, players: [player] });
     });
-    setPlayerSets(updatedSets);
+    socket.emit('UPLOAD_DATA', { roomId, sets: updatedSets });
   };
 
-  const initializeGame = (teamsData, customConfig) => {
-    setConfig(customConfig);
-    const teamsObj = teamsData.map(t => ({
-      ...t, budget: parseFloat(customConfig.budget), spent: 0, squad: [], foreignCount: 0
-    }));
-    setActiveTeams(teamsObj);
-    // CHANGED: Go to selection page instead of review
-    setCurrentPage('selection'); 
-  };
-
-  // ... [Keep resetGame, hasSavedGame, addPlayerToSet, deletePlayerFromSet, sellPlayer, markUnsold, etc. EXACTLY AS BEFORE] ...
-  
-  const resetGame = () => { localStorage.clear(); window.location.reload(); };
-  const hasSavedGame = () => { return localStorage.getItem('ipl_activeTeams') !== null && JSON.parse(localStorage.getItem('ipl_activeTeams')).length > 0; };
-  const addPlayerToSet = (setIndex, newPlayer) => { const updatedSets = [...playerSets]; updatedSets[setIndex].players.push(newPlayer); setPlayerSets(updatedSets); };
-  const deletePlayerFromSet = (setIndex, playerId) => { const updatedSets = [...playerSets]; updatedSets[setIndex].players = updatedSets[setIndex].players.filter(p => p.id !== playerId); setPlayerSets(updatedSets); };
-  const sellPlayer = (player, teamName, soldPrice) => {
-    const updatedTeams = activeTeams.map(team => {
-      if (team.name === teamName) {
-        return {
-          ...team,
-          budget: team.budget - parseFloat(soldPrice),
-          spent: team.spent + parseFloat(soldPrice),
-          squad: [...team.squad, { ...player, soldPrice: parseFloat(soldPrice) }],
-          foreignCount: player.isForeign ? team.foreignCount + 1 : team.foreignCount
-        };
-      }
-      return team;
-    });
-    setActiveTeams(updatedTeams);
-    removePlayerFromSet(player.id);
-  };
-  const markUnsold = (player) => { setUnsoldPlayers([...unsoldPlayers, player]); removePlayerFromSet(player.id); };
-  const removePlayerFromSet = (playerId) => { const updatedSets = playerSets.map(set => ({ ...set, players: set.players.filter(p => p.id !== playerId) })).filter(set => set.players.length > 0); setPlayerSets(updatedSets); };
-  const startUnsoldRound = () => { if (unsoldPlayers.length === 0) return false; const unsoldSet = { setName: "Re-Auction: Unsold Players", players: [...unsoldPlayers] }; setPlayerSets([unsoldSet]); setUnsoldPlayers([]); return true; };
-  const canFinishAuction = () => { if (activeTeams.length === 0) return false; return activeTeams.every(team => team.squad.length >= config.minPlayers); };
-  const deleteSet = (index) => {
-      // Prevent deleting the currently active set to avoid crashing the game loop
-      if (index === currentSetIndex) {
-        alert("⚠️ Cannot delete the currently active set! Finish or skip it instead.");
-        return;
-      }
-      
-      // Filter out the set at the specific index
-      const updatedSets = playerSets.filter((_, i) => i !== index);
-      setPlayerSets(updatedSets);
+  const startReveal = (player) => socket.emit('START_TIMER', { roomId, player });
+  const sellPlayer = (player, teamName, soldPrice) => socket.emit('SOLD', { roomId, teamName, price: soldPrice });
+  const markUnsold = (player) => socket.emit('UNSOLD', { roomId });
+  const navigateTo = (page) => socket.emit('NAVIGATE', { roomId, page });
+  const toggleReady = () => {
+    if(!socket) return;
+    socket.emit('PLAYER_READY', { roomId });
     };
+  const startAuction = () => {
+    if(!socket) return;
+    socket.emit('START_AUCTION', { roomId });
+  };
+
+  const addPlayerToSet = (setIndex, player) => {
+    if(!socket) return;
+    socket.emit('ADD_PLAYER', { roomId, setIndex, player });
+  };
+
+  const deletePlayerFromSet = (setIndex, playerId) => {
+    if(!socket) return;
+    socket.emit('DELETE_PLAYER', { roomId, setIndex, playerId });
+  };
+  // Mocks
+  const placeBid = (amount) => socket.emit('BID', { roomId, teamName: "MY_TEAM", amount }); 
+  const resetGame = () => window.location.reload(); 
+  const hasSavedGame = () => false; 
+  const deleteSet = () => {};
+  const canFinishAuction = () => activeTeams.every(team => team.squad && team.squad.length >= config.minPlayers);
+  const startUnsoldRound = () => {};
+
   return (
     <AuctionContext.Provider value={{
-      config, setConfig, activeTeams, setActiveTeams, playerSets, setPlayerSets, unsoldPlayers,
-      currentPage, setCurrentPage, currentSetIndex, setCurrentSetIndex,
-      initializeGame, importPlayersBulk, // Exported
-      addPlayerToSet, deletePlayerFromSet, sellPlayer, markUnsold, startUnsoldRound, canFinishAuction,
-      resetGame, hasSavedGame, deleteSet
+      socket, isConnected, roomId, isHost, connectedUsers,
+      config, activeTeams, customTeams, playerSets, unsoldPlayers, // Added customTeams
+      currentPage, currentSetIndex, setCurrentSetIndex,
+      currentAuctionState,
+      
+      joinGame, updateSettings, claimTeam, addCustomTeam, startGame,
+      importPlayersBulk, sellPlayer, markUnsold, startReveal, placeBid,toggleReady,
+      resetGame, hasSavedGame, setCurrentPage: navigateTo,startAuction,addPlayerToSet,
+      canFinishAuction, startUnsoldRound, deletePlayerFromSet, deleteSet
     }}>
       {children}
     </AuctionContext.Provider>

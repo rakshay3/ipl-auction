@@ -25,3 +25,5 @@ yarn-error.log*
 flipcard.txt
 auctionContextPrev.txt
 spin.txt
+
+/server/node_modules
