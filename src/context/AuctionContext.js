@@ -9,27 +9,33 @@ export const AuctionProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   
-  // STATE
+  // --- GLOBAL ROOM STATE ---
   const [roomId, setRoomId] = useState(null);
   const [isHost, setIsHost] = useState(false);
+  const [config, setConfig] = useState({ budget: 100, minPlayers: 15, maxPlayers: 25, maxForeign: 8, defaultTimer: 60 });
   
-  // Game Data
-  const [config, setConfig] = useState({ budget: 100, minPlayers: 15, maxPlayers: 25, maxForeign: 8 });
+  // Lists
   const [activeTeams, setActiveTeams] = useState([]);
-  const [customTeams, setCustomTeams] = useState([]); 
+  const [customTeams, setCustomTeams] = useState([]);
   const [connectedUsers, setConnectedUsers] = useState([]);
   const [playerSets, setPlayerSets] = useState([]);
   const [unsoldPlayers, setUnsoldPlayers] = useState([]);
+  const [feed, setFeed] = useState([]); // <--- NEW: Chat/Event Log
+  const [finishVotes, setFinishVotes] = useState([]); // <--- NEW: Finish Consensus
+  
+  // Navigation
   const [currentPage, setCurrentPage] = useState('landing');
   const [currentSetIndex, setCurrentSetIndex] = useState(0);
   
-  // Auction Status
+  // --- LIVE AUCTION STATE ---
   const [currentAuctionState, setCurrentAuctionState] = useState({
     currentPlayer: null,
     currentBid: 0,
     currentBidder: null,
     timer: 60,
-    status: 'IDLE'
+    status: 'IDLE',
+    activeBidders: [], // Default to empty array to prevent crash
+    isPaused: false
   });
 
   useEffect(() => {
@@ -43,24 +49,34 @@ export const AuctionProvider = ({ children }) => {
 
     newSocket.on('disconnect', () => setIsConnected(false));
 
-    // MAIN LISTENER
+    // --- MAIN EVENT LISTENER ---
     newSocket.on('STATE_UPDATE', (serverState) => {
-      // console.log("📥 Update:", serverState);
       
+      // 1. Global Data
       if(serverState.config) setConfig(serverState.config);
       if(serverState.activeTeams) setActiveTeams(serverState.activeTeams);
-      if(serverState.customTeams) setCustomTeams(serverState.customTeams); // <--- SYNC
+      if(serverState.customTeams) setCustomTeams(serverState.customTeams);
       if(serverState.connectedUsers) setConnectedUsers(serverState.connectedUsers);
       if(serverState.playerSets) setPlayerSets(serverState.playerSets);
       if(serverState.unsoldPlayers) setUnsoldPlayers(serverState.unsoldPlayers);
-      if(serverState.currentPage) setCurrentPage(serverState.currentPage);
       
+      // 2. New Features
+      if(serverState.feed) setFeed(serverState.feed);
+      if(serverState.finishVotes) setFinishVotes(serverState.finishVotes);
+
+      // 3. Navigation
+      if(serverState.currentPage) setCurrentPage(serverState.currentPage);
+      if(serverState.currentSetIndex !== undefined) setCurrentSetIndex(serverState.currentSetIndex);
+      
+      // 4. Live Auction Data (Grouped)
       setCurrentAuctionState({
         currentPlayer: serverState.currentPlayer,
         currentBid: serverState.currentBid,
         currentBidder: serverState.currentBidder,
         timer: serverState.timer,
-        status: serverState.auctionStatus
+        status: serverState.auctionStatus,
+        activeBidders: serverState.activeBidders || [], // Safety Fallback
+        isPaused: serverState.isPaused || false
       });
     });
 
@@ -71,6 +87,7 @@ export const AuctionProvider = ({ children }) => {
 
   // --- ACTIONS ---
 
+  // Setup & Lobby
   const joinGame = (code, name, host = false) => {
     if (!socket) return;
     setRoomId(code);
@@ -78,26 +95,12 @@ export const AuctionProvider = ({ children }) => {
     socket.emit('JOIN_ROOM', { roomId: code, userName: name, isHost: host });
   };
 
-  const updateSettings = (newConfig) => {
-    if(!socket) return;
-    socket.emit('UPDATE_SETTINGS', { roomId, config: newConfig });
-  };
-
-  const claimTeam = (team) => {
-    if(!socket) return;
-    socket.emit('CLAIM_TEAM', { roomId, team });
-  };
-
-  const addCustomTeam = (team) => {
-    if(!socket) return;
-    socket.emit('ADD_CUSTOM_TEAM', { roomId, team });
-  };
-
-  const startGame = () => {
-    if(!socket) return;
-    socket.emit('START_GAME', { roomId });
-  };
-
+  const updateSettings = (newConfig) => socket?.emit('UPDATE_SETTINGS', { roomId, config: newConfig });
+  const claimTeam = (team) => socket?.emit('CLAIM_TEAM', { roomId, team });
+  const addCustomTeam = (team) => socket?.emit('ADD_CUSTOM_TEAM', { roomId, team });
+  const startGame = () => socket?.emit('START_GAME', { roomId });
+  
+  // Data Loading
   const importPlayersBulk = (entries) => {
     const updatedSets = [];
     entries.forEach(entry => {
@@ -109,47 +112,54 @@ export const AuctionProvider = ({ children }) => {
     socket.emit('UPLOAD_DATA', { roomId, sets: updatedSets });
   };
 
-  const startReveal = (player) => socket.emit('START_TIMER', { roomId, player });
-  const sellPlayer = (player, teamName, soldPrice) => socket.emit('SOLD', { roomId, teamName, price: soldPrice });
-  const markUnsold = (player) => socket.emit('UNSOLD', { roomId });
-  const navigateTo = (page) => socket.emit('NAVIGATE', { roomId, page });
-  const toggleReady = () => {
-    if(!socket) return;
-    socket.emit('PLAYER_READY', { roomId });
-    };
-  const startAuction = () => {
-    if(!socket) return;
-    socket.emit('START_AUCTION', { roomId });
-  };
+  // Review Phase
+  const toggleReady = () => socket?.emit('PLAYER_READY', { roomId });
+  const startAuction = () => socket?.emit('START_AUCTION', { roomId });
+  const addPlayerToSet = (setIndex, player) => socket?.emit('ADD_PLAYER', { roomId, setIndex, player });
+  const deletePlayerFromSet = (setIndex, playerId) => socket?.emit('DELETE_PLAYER', { roomId, setIndex, playerId });
 
-  const addPlayerToSet = (setIndex, player) => {
-    if(!socket) return;
-    socket.emit('ADD_PLAYER', { roomId, setIndex, player });
-  };
+  // Live Auction Controls
+  const startAutoLoop = () => socket?.emit('START_TIMER', { roomId }); // Now triggers the auto-loop
+  const pauseGame = () => socket?.emit('PAUSE_RESUME', { roomId });
+  const placeBid = (amount) => socket?.emit('BID', { roomId, amount });
+  const withdrawBid = () => socket?.emit('WITHDRAW', { roomId });
+  const requestTime = () => socket?.emit('NEED_TIME', { roomId });
+  const changeTimer = (seconds) => socket?.emit('CHANGE_TIMER', { roomId, seconds });
 
-  const deletePlayerFromSet = (setIndex, playerId) => {
-    if(!socket) return;
-    socket.emit('DELETE_PLAYER', { roomId, setIndex, playerId });
-  };
-  // Mocks
-  const placeBid = (amount) => socket.emit('BID', { roomId, teamName: "MY_TEAM", amount }); 
+  // Finish Logic
+  const voteFinish = () => socket?.emit('VOTE_FINISH', { roomId });
+
+  // Host Overrides / Helpers
+  const sellPlayer = (player, teamName, soldPrice) => {if(!socket) return; socket.emit('SOLD', { roomId, teamName, price: soldPrice });}; // Deprecated in V2 Auto-Loop, but kept for legacy props
+  const markUnsold = (player) => {if(!socket) return; socket.emit('UNSOLD', { roomId });}; // Deprecated
+  const startReveal = (player) => {}; // Deprecated
+
   const resetGame = () => window.location.reload(); 
-  const hasSavedGame = () => false; 
-  const deleteSet = () => {};
+  const navigateTo = (page) => socket?.emit('NAVIGATE', { roomId, page });
+  
+  // Derived State Helpers
   const canFinishAuction = () => activeTeams.every(team => team.squad && team.squad.length >= config.minPlayers);
-  const startUnsoldRound = () => {};
 
   return (
     <AuctionContext.Provider value={{
-      socket, isConnected, roomId, isHost, connectedUsers,
-      config, activeTeams, customTeams, playerSets, unsoldPlayers, // Added customTeams
+      // Data
+      socket, isConnected, roomId, isHost,
+      config, activeTeams, customTeams, connectedUsers, 
+      playerSets, unsoldPlayers, feed, finishVotes,
       currentPage, currentSetIndex, setCurrentSetIndex,
       currentAuctionState,
       
+      // Actions
       joinGame, updateSettings, claimTeam, addCustomTeam, startGame,
-      importPlayersBulk, sellPlayer, markUnsold, startReveal, placeBid,toggleReady,
-      resetGame, hasSavedGame, setCurrentPage: navigateTo,startAuction,addPlayerToSet,
-      canFinishAuction, startUnsoldRound, deletePlayerFromSet, deleteSet
+      importPlayersBulk, toggleReady, startAuction,
+      addPlayerToSet, deletePlayerFromSet,
+      
+      startAutoLoop, pauseGame, placeBid, withdrawBid, requestTime, changeTimer,
+      voteFinish,
+      
+      // Legacy / Utils
+      sellPlayer, markUnsold, startReveal,
+      resetGame, setCurrentPage: navigateTo, canFinishAuction
     }}>
       {children}
     </AuctionContext.Provider>
