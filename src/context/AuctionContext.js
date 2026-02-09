@@ -139,7 +139,8 @@ export const AuctionProvider = ({ children }) => {
   
   // Derived State Helpers
   const canFinishAuction = () => activeTeams.every(team => team.squad && team.squad.length >= config.minPlayers);
-
+// Finish Logic
+  const endRoom = () => socket?.emit('END_ROOM', { roomId });
   return (
     <AuctionContext.Provider value={{
       // Data
@@ -152,7 +153,7 @@ export const AuctionProvider = ({ children }) => {
       // Actions
       joinGame, updateSettings, claimTeam, addCustomTeam, startGame,
       importPlayersBulk, toggleReady, startAuction,
-      addPlayerToSet, deletePlayerFromSet,
+      addPlayerToSet, deletePlayerFromSet,endRoom,
       
       startAutoLoop, pauseGame, placeBid, withdrawBid, requestTime, changeTimer,
       voteFinish,

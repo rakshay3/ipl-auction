@@ -6,10 +6,10 @@ const AuctionPage = () => {
   const { 
     isHost, socket,
     activeTeams, playerSets, config, 
-    currentAuctionState, feed, 
+    currentAuctionState, feed, finishVotes, connectedUsers,
     startAutoLoop, placeBid, pauseGame, withdrawBid, requestTime, changeTimer,
-    currentSetIndex, setCurrentPage, canFinishAuction,
-    sellPlayer, markUnsold // Legacy helpers for manual override if needed
+    currentSetIndex, canFinishAuction, voteFinish, endRoom,
+    sellPlayer, markUnsold 
   } = useAuction();
 
   // Destructure State
@@ -36,14 +36,18 @@ const AuctionPage = () => {
   const isMyBid = currentBidder === myTeam?.name;
   const isInWar = activeBidders && activeBidders.includes(myTeam?.name);
   const isLockedOut = activeBidders.length >= 2 && !isInWar;
+  
+  // Finish Logic
+  const hasVoted = finishVotes.includes(socket?.id);
+  const voteCount = finishVotes.length;
+  const totalUsers = connectedUsers.length;
+  const finishEnabled = canFinishAuction();
 
-  // --- NEXT BID CALCULATION (FIXED) ---
+  // Next Bid
   let nextBid;
   if (currentBid === 0) {
-      // First bid must be Base Price
       nextBid = currentPlayer ? parseFloat(currentPlayer.basePrice) : 0;
   } else {
-      // Increment Logic
       let increment = currentBid < 10 ? 0.20 : 0.25;
       nextBid = parseFloat((currentBid + increment).toFixed(2));
   }
@@ -61,45 +65,68 @@ const AuctionPage = () => {
           <p style={{margin:0, opacity:0.7, color:'white'}}>Set: {currentSet.setName} ({currentSet.players.length} remaining)</p>
         </div>
         
-        {/* HOST CONTROLS TOP (Global Game State) */}
-        <div>
+        {/* TOP CONTROLS */}
+        <div style={{display:'flex', gap:'10px', alignItems:'center'}}>
+            
+            {/* VOTE FINISH (For Everyone) */}
+            <button 
+                className="btn-finish" 
+                onClick={voteFinish}
+                disabled={!finishEnabled}
+                style={{
+                    background: hasVoted ? '#22c55e' : (finishEnabled ? '#2563eb' : '#9ca3af'),
+                    opacity: finishEnabled ? 1 : 0.6,
+                    cursor: finishEnabled ? 'pointer' : 'not-allowed',
+                    border: hasVoted ? '2px solid white' : 'none',
+                    minWidth: '140px'
+                }}
+            >
+                {hasVoted ? `✅ Voted (${voteCount}/${totalUsers})` : `🏁 Finish (${voteCount}/${totalUsers})`}
+            </button>
+
+            {/* HOST ONLY CONTROLS */}
             {isHost && (
-                <div style={{display:'flex', gap:'10px', alignItems:'center'}}>
-                   {/* Timer Control */}
+                <>
                    <div style={{background:'rgba(255,255,255,0.2)', padding:'5px 10px', borderRadius:'5px', display:'flex', gap:'5px', alignItems:'center'}}>
-                      <span style={{color:'white', fontSize:'0.8rem'}}>Timer:</span>
+                      <span style={{color:'white', fontSize:'0.8rem'}}>Time:</span>
                       <input 
                         type="number" 
                         value={newTimerVal} 
                         onChange={(e) => setNewTimerVal(e.target.value)}
-                        style={{width:'50px', padding:'5px', borderRadius:'3px', border:'none'}} 
+                        style={{width:'40px', padding:'5px', borderRadius:'3px', border:'none'}} 
                       />
                       <button onClick={() => changeTimer(newTimerVal)} style={{cursor:'pointer', background:'white', border:'none', borderRadius:'3px', padding:'5px'}}>Set</button>
                    </div>
 
-                   <button className="primary-btn" onClick={pauseGame} style={{background: isPaused ? '#22c55e' : '#f59e0b', minWidth:'100px'}}>
-                      {isPaused ? "▶ RESUME" : "⏸ PAUSE"}
+                   <button className="primary-btn" onClick={pauseGame} style={{background: isPaused ? '#f59e0b' : '#3b82f6', minWidth:'80px'}}>
+                      {isPaused ? "RESUME" : "PAUSE"}
                    </button>
                    
                    <button 
-                      className="btn-finish" 
-                      onClick={() => setCurrentPage('summary')}
-                      disabled={!canFinishAuction()}
-                      style={{opacity: canFinishAuction() ? 1 : 0.5, cursor: canFinishAuction() ? 'pointer' : 'not-allowed'}}
+                      onClick={endRoom}
+                      style={{
+                          background: '#ef4444', 
+                          color:'white', 
+                          border:'none', 
+                          padding:'10px', 
+                          borderRadius:'5px',
+                          cursor:'pointer',
+                          fontWeight:'bold'
+                      }}
+                      title="Force Close Room"
                    >
-                      🏁 Finish
+                      ⛔ END
                    </button>
-                </div>
+                </>
             )}
         </div>
       </div>
 
       <div className="auction-layout" style={{gridTemplateColumns: '1fr 2fr 1fr', gap:'20px'}}>
         
-        {/* LEFT: STATUS & CONTROLS */}
+        {/* LEFT: STATUS */}
         <div className="auction-controls" style={{display:'flex', flexDirection:'column', gap:'20px'}}>
            
-           {/* MY TEAM STATUS (Visible to Host AND Bidders) */}
            <div style={{textAlign:'center', padding:'20px', background:'#f8f9fa', borderRadius:'10px'}}>
                 <h4>{myTeam ? myTeam.abbr : "Observer Mode"}</h4>
                 {myTeam ? (
@@ -125,11 +152,10 @@ const AuctionPage = () => {
                         </div>
                     </>
                 ) : (
-                    <p style={{color:'#666'}}>You have no team. You can watch.</p>
+                    <p style={{color:'#666'}}>You are watching.</p>
                 )}
            </div>
 
-           {/* HOST MANUAL CONTROLS (Only if needed) */}
            {isHost && (
                <div style={{padding:'15px', background:'#fee2e2', borderRadius:'10px'}}>
                    <h5 style={{margin:'0 0 10px 0', color:'#991b1b'}}>⚠️ Admin Override</h5>
@@ -140,7 +166,6 @@ const AuctionPage = () => {
                </div>
            )}
 
-           {/* LIVE FEED */}
            <div style={{background:'rgba(0,0,0,0.4)', borderRadius:'10px', padding:'10px', flex:1, display:'flex', flexDirection:'column'}}>
               <h4 style={{color:'white', margin:'0 0 10px 0'}}>📢 Live Feed</h4>
               <div ref={feedRef} style={{flex:1, overflowY:'auto', maxHeight:'300px', display:'flex', flexDirection:'column', gap:'5px'}}>
@@ -159,10 +184,8 @@ const AuctionPage = () => {
            </div>
         </div>
 
-        {/* CENTER: PLAYER CARD */}
+        {/* CENTER: PLAYER */}
         <div className="player-card-section" style={{position:'relative'}}>
-          
-          {/* PAUSED OVERLAY */}
           {isPaused && (
               <div style={{position:'absolute', top:0, left:0, width:'100%', height:'100%', background:'rgba(0,0,0,0.7)', zIndex:10, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:'15px'}}>
                   <h1 style={{color:'white', fontSize:'4rem', margin:0}}>PAUSED</h1>
@@ -180,8 +203,6 @@ const AuctionPage = () => {
              </div>
           ) : (
              <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-                 
-                 {/* SOLD ANIMATION */}
                  {status === 'SOLD_ANIMATION' ? (
                      <div className="fade-in" style={{textAlign:'center', marginTop:'50px'}}>
                          <h1 style={{fontSize:'5rem', color: currentBidder ? '#22c55e' : '#ef4444', margin:0, textShadow:'0 5px 15px rgba(0,0,0,0.3)'}}>
@@ -191,7 +212,6 @@ const AuctionPage = () => {
                          <p style={{color:'#ccc'}}>Next player in 5s...</p>
                      </div>
                  ) : (
-                     // LIVE CARD
                      <>
                         <div style={{
                             position:'absolute', top:'10px', right:'10px', 
@@ -220,7 +240,6 @@ const AuctionPage = () => {
                             <div style={{color:'#2563eb', fontWeight:'bold', fontSize:'1.2rem', marginTop:'5px'}}>{currentBidder || "No Bids Yet"}</div>
                         </div>
 
-                        {/* BID BUTTON - VISIBLE TO EVERYONE WITH A TEAM (Host Included) */}
                         {myTeam && (
                             isLockedOut ? (
                                 <button disabled style={{background:'#6b7280', color:'white', border:'none', padding:'20px 60px', borderRadius:'50px', fontSize:'1.5rem', cursor:'not-allowed'}}>
