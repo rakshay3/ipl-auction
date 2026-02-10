@@ -6,9 +6,9 @@ const AuctionPage = () => {
   const { 
     isHost, socket,
     activeTeams, playerSets, config, 
-    currentAuctionState, feed, finishVotes, connectedUsers,
+    currentAuctionState, feed, 
     startAutoLoop, placeBid, pauseGame, withdrawBid, requestTime, changeTimer,
-    currentSetIndex, canFinishAuction, voteFinish, endRoom,
+    currentSetIndex, setCurrentPage, canFinishAuction,
     sellPlayer, markUnsold 
   } = useAuction();
 
@@ -23,25 +23,18 @@ const AuctionPage = () => {
   
   // Local State
   const [newTimerVal, setNewTimerVal] = useState(45);
+  const [rightTab, setRightTab] = useState('standings'); // 'standings' | 'mysquad'
   const feedRef = useRef(null);
 
   // Auto-scroll feed
   useEffect(() => {
-    if (feedRef.current) {
-      feedRef.current.scrollTop = 0; 
-    }
+    if (feedRef.current) feedRef.current.scrollTop = 0; 
   }, [feed]);
 
   // --- LOGIC ---
   const isMyBid = currentBidder === myTeam?.name;
   const isInWar = activeBidders && activeBidders.includes(myTeam?.name);
   const isLockedOut = activeBidders.length >= 2 && !isInWar;
-  
-  // Finish Logic
-  const hasVoted = finishVotes.includes(socket?.id);
-  const voteCount = finishVotes.length;
-  const totalUsers = connectedUsers.length;
-  const finishEnabled = canFinishAuction();
 
   // Next Bid
   let nextBid;
@@ -51,6 +44,14 @@ const AuctionPage = () => {
       let increment = currentBid < 10 ? 0.20 : 0.25;
       nextBid = parseFloat((currentBid + increment).toFixed(2));
   }
+
+  // --- HELPER: Get Team Stats ---
+  const getTeamStats = (team) => {
+      const bats = team.squad.filter(p => p.type === 'Batsman' || p.type === 'Wicket Keeper').length;
+      const bowls = team.squad.filter(p => p.type === 'Bowler' || p.type === 'All-Rounder').length;
+      const percentUsed = ((config.budget - team.budget) / config.budget) * 100;
+      return { bats, bowls, percentUsed };
+  };
 
   // --- RENDER ---
 
@@ -66,94 +67,36 @@ const AuctionPage = () => {
         </div>
         
         {/* TOP CONTROLS */}
-        <div style={{display:'flex', gap:'10px', alignItems:'center'}}>
-            
-            {/* VOTE FINISH (For Everyone) */}
-            <button 
-                className="btn-finish" 
-                onClick={voteFinish}
-                disabled={!finishEnabled}
-                style={{
-                    background: hasVoted ? '#22c55e' : (finishEnabled ? '#2563eb' : '#9ca3af'),
-                    opacity: finishEnabled ? 1 : 0.6,
-                    cursor: finishEnabled ? 'pointer' : 'not-allowed',
-                    border: hasVoted ? '2px solid white' : 'none',
-                    minWidth: '140px'
-                }}
-            >
-                {hasVoted ? `✅ Voted (${voteCount}/${totalUsers})` : `🏁 Finish (${voteCount}/${totalUsers})`}
-            </button>
-
-            {/* HOST ONLY CONTROLS */}
+        <div>
             {isHost && (
-                <>
+                <div style={{display:'flex', gap:'10px', alignItems:'center'}}>
                    <div style={{background:'rgba(255,255,255,0.2)', padding:'5px 10px', borderRadius:'5px', display:'flex', gap:'5px', alignItems:'center'}}>
-                      <span style={{color:'white', fontSize:'0.8rem'}}>Time:</span>
-                      <input 
-                        type="number" 
-                        value={newTimerVal} 
-                        onChange={(e) => setNewTimerVal(e.target.value)}
-                        style={{width:'40px', padding:'5px', borderRadius:'3px', border:'none'}} 
-                      />
+                      <span style={{color:'white', fontSize:'0.8rem'}}>Timer:</span>
+                      <input type="number" value={newTimerVal} onChange={(e) => setNewTimerVal(e.target.value)} style={{width:'40px', padding:'5px', borderRadius:'3px', border:'none'}} />
                       <button onClick={() => changeTimer(newTimerVal)} style={{cursor:'pointer', background:'white', border:'none', borderRadius:'3px', padding:'5px'}}>Set</button>
                    </div>
-
-                   <button className="primary-btn" onClick={pauseGame} style={{background: isPaused ? '#f59e0b' : '#3b82f6', minWidth:'80px'}}>
-                      {isPaused ? "RESUME" : "PAUSE"}
-                   </button>
-                   
-                   <button 
-                      onClick={endRoom}
-                      style={{
-                          background: '#ef4444', 
-                          color:'white', 
-                          border:'none', 
-                          padding:'10px', 
-                          borderRadius:'5px',
-                          cursor:'pointer',
-                          fontWeight:'bold'
-                      }}
-                      title="Force Close Room"
-                   >
-                      ⛔ END
-                   </button>
-                </>
+                   <button className="primary-btn" onClick={pauseGame} style={{background: isPaused ? '#22c55e' : '#f59e0b', minWidth:'80px'}}>{isPaused ? "RESUME" : "PAUSE"}</button>
+                   <button className="btn-finish" onClick={() => setCurrentPage('summary')} disabled={!canFinishAuction()} style={{opacity: canFinishAuction() ? 1 : 0.5, cursor: canFinishAuction() ? 'pointer' : 'not-allowed'}}>🏁 Finish</button>
+                </div>
             )}
         </div>
       </div>
 
       <div className="auction-layout" style={{gridTemplateColumns: '1fr 2fr 1fr', gap:'20px'}}>
         
-        {/* LEFT: STATUS */}
+        {/* LEFT: STATUS & CONTROLS */}
         <div className="auction-controls" style={{display:'flex', flexDirection:'column', gap:'20px'}}>
-           
            <div style={{textAlign:'center', padding:'20px', background:'#f8f9fa', borderRadius:'10px'}}>
                 <h4>{myTeam ? myTeam.abbr : "Observer Mode"}</h4>
                 {myTeam ? (
                     <>
                         <p style={{fontSize:'1.2rem', fontWeight:'bold', color:'#2563eb'}}>Budget: {myTeam.budget} Cr</p>
                         <div style={{display:'flex', flexDirection:'column', gap:'10px'}}>
-                            <button 
-                                onClick={requestTime}
-                                disabled={status !== 'REVEALED' || isPaused}
-                                style={{background:'#3b82f6', color:'white', border:'none', padding:'12px', borderRadius:'5px', cursor:'pointer', opacity: status !== 'REVEALED' ? 0.5 : 1}}
-                            >
-                                ⏱ NEED TIME (+30s)
-                            </button>
-                            
-                            {isInWar && !isMyBid && (
-                                <button 
-                                    onClick={withdrawBid}
-                                    style={{background:'#ef4444', color:'white', border:'none', padding:'12px', borderRadius:'5px', cursor:'pointer'}}
-                                >
-                                    🏃 WITHDRAW
-                                </button>
-                            )}
+                            <button onClick={requestTime} disabled={status !== 'REVEALED' || isPaused} style={{background:'#3b82f6', color:'white', border:'none', padding:'12px', borderRadius:'5px', cursor:'pointer', opacity: status !== 'REVEALED' ? 0.5 : 1}}>⏱ NEED TIME (+30s)</button>
+                            {isInWar && !isMyBid && <button onClick={withdrawBid} style={{background:'#ef4444', color:'white', border:'none', padding:'12px', borderRadius:'5px', cursor:'pointer'}}>🏃 WITHDRAW</button>}
                         </div>
                     </>
-                ) : (
-                    <p style={{color:'#666'}}>You are watching.</p>
-                )}
+                ) : <p style={{color:'#666'}}>You are watching.</p>}
            </div>
 
            {isHost && (
@@ -170,13 +113,8 @@ const AuctionPage = () => {
               <h4 style={{color:'white', margin:'0 0 10px 0'}}>📢 Live Feed</h4>
               <div ref={feedRef} style={{flex:1, overflowY:'auto', maxHeight:'300px', display:'flex', flexDirection:'column', gap:'5px'}}>
                   {feed.map((log, i) => (
-                      <div key={i} style={{
-                          background: log.type === 'BID' ? '#dbeafe' : (log.type === 'SUCCESS' ? '#dcfce7' : (log.type === 'ERROR' ? '#fee2e2' : 'white')),
-                          padding:'8px', borderRadius:'5px', fontSize:'0.85rem', color:'#333'
-                      }}>
-                          <span style={{opacity:0.6, fontSize:'0.7rem', marginRight:'5px'}}>
-                            {new Date(log.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})}
-                          </span>
+                      <div key={i} style={{background: log.type === 'BID' ? '#dbeafe' : (log.type === 'SUCCESS' ? '#dcfce7' : (log.type === 'ERROR' ? '#fee2e2' : 'white')), padding:'8px', borderRadius:'5px', fontSize:'0.85rem', color:'#333'}}>
+                          <span style={{opacity:0.6, fontSize:'0.7rem', marginRight:'5px'}}>{new Date(log.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})}</span>
                           {log.msg}
                       </div>
                   ))}
@@ -184,7 +122,7 @@ const AuctionPage = () => {
            </div>
         </div>
 
-        {/* CENTER: PLAYER */}
+        {/* CENTER: PLAYER CARD */}
         <div className="player-card-section" style={{position:'relative'}}>
           {isPaused && (
               <div style={{position:'absolute', top:0, left:0, width:'100%', height:'100%', background:'rgba(0,0,0,0.7)', zIndex:10, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:'15px'}}>
@@ -196,44 +134,28 @@ const AuctionPage = () => {
              <div style={{textAlign:'center', marginTop:'50px'}}>
                 <div style={{fontSize:'80px', opacity:0.3, marginBottom:'20px'}}>🏏</div>
                 {isHost ? (
-                    <button className="primary-btn" onClick={startAutoLoop} style={{padding:'20px 40px', fontSize:'1.5rem', borderRadius:'50px', boxShadow:'0 10px 30px rgba(0,0,0,0.3)'}}>
-                        START SET
-                    </button>
+                    <button className="primary-btn" onClick={startAutoLoop} style={{padding:'20px 40px', fontSize:'1.5rem', borderRadius:'50px', boxShadow:'0 10px 30px rgba(0,0,0,0.3)'}}>START SET</button>
                 ) : <h3 style={{color:'white'}}>Waiting for Host to start set...</h3>}
              </div>
           ) : (
              <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
                  {status === 'SOLD_ANIMATION' ? (
                      <div className="fade-in" style={{textAlign:'center', marginTop:'50px'}}>
-                         <h1 style={{fontSize:'5rem', color: currentBidder ? '#22c55e' : '#ef4444', margin:0, textShadow:'0 5px 15px rgba(0,0,0,0.3)'}}>
-                             {currentBidder ? "SOLD" : "UNSOLD"}
-                         </h1>
+                         <h1 style={{fontSize:'5rem', color: currentBidder ? '#22c55e' : '#ef4444', margin:0, textShadow:'0 5px 15px rgba(0,0,0,0.3)'}}>{currentBidder ? "SOLD" : "UNSOLD"}</h1>
                          {currentBidder && <h3 style={{color:'white', fontSize:'2rem'}}>to {currentBidder} for {currentBid} Cr</h3>}
                          <p style={{color:'#ccc'}}>Next player in 5s...</p>
                      </div>
                  ) : (
                      <>
-                        <div style={{
-                            position:'absolute', top:'10px', right:'10px', 
-                            background: timer <= 10 ? '#ef4444' : '#333', color:'white', 
-                            width:'70px', height:'70px', borderRadius:'50%', 
-                            display:'flex', alignItems:'center', justifyContent:'center', 
-                            fontWeight:'bold', fontSize:'2rem', boxShadow:'0 5px 15px rgba(0,0,0,0.3)',
-                            border:'4px solid white', zIndex:5
-                        }}>
-                            {timer}
-                        </div>
-
+                        <div style={{position:'absolute', top:'10px', right:'10px', background: timer <= 10 ? '#ef4444' : '#333', color:'white', width:'70px', height:'70px', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:'bold', fontSize:'2rem', boxShadow:'0 5px 15px rgba(0,0,0,0.3)', border:'4px solid white', zIndex:5}}>{timer}</div>
                         <div style={{width: '220px', height: '220px', borderRadius: '50%', border: '8px solid #667eea', overflow: 'hidden', marginBottom: '20px', background: 'white', boxShadow:'0 10px 30px rgba(0,0,0,0.2)'}}>
                             <img src={currentPlayer?.img || DEFAULT_AVATAR} alt="p" style={{width:'100%', height:'100%', objectFit:'cover'}} />
                         </div>
-                        
                         <h2 style={{fontSize:'2.5rem', margin:'0 0 10px 0'}}>{currentPlayer?.name}</h2>
                         <div style={{display:'flex', gap:'10px', marginBottom:'20px'}}>
                              <span className="badge role" style={{fontSize:'1rem', padding:'5px 15px'}}>{currentPlayer?.type}</span>
                              <span className="badge country" style={{fontSize:'1rem', padding:'5px 15px'}}>{currentPlayer?.country}</span>
                         </div>
-                        
                         <div style={{background: currentBidder ? '#dbeafe' : '#f3f4f6', padding:'20px 50px', borderRadius:'15px', textAlign:'center', marginBottom:'30px', boxShadow:'inset 0 2px 5px rgba(0,0,0,0.05)'}}>
                             <small style={{color:'#666', textTransform:'uppercase', letterSpacing:'1px'}}>Current Bid</small>
                             <div style={{fontSize:'4rem', fontWeight:'900', color:'#1e3a8a', lineHeight:1}}>{currentBid} <span style={{fontSize:'1.5rem'}}>Cr</span></div>
@@ -242,23 +164,9 @@ const AuctionPage = () => {
 
                         {myTeam && (
                             isLockedOut ? (
-                                <button disabled style={{background:'#6b7280', color:'white', border:'none', padding:'20px 60px', borderRadius:'50px', fontSize:'1.5rem', cursor:'not-allowed'}}>
-                                    🔒 LOCKED OUT
-                                </button>
+                                <button disabled style={{background:'#6b7280', color:'white', border:'none', padding:'20px 60px', borderRadius:'50px', fontSize:'1.5rem', cursor:'not-allowed'}}>🔒 LOCKED OUT</button>
                             ) : (
-                                <button 
-                                    onClick={() => placeBid(nextBid)}
-                                    disabled={isMyBid}
-                                    style={{
-                                        background: isMyBid ? '#22c55e' : '#2563eb', 
-                                        color:'white', border:'none', 
-                                        padding:'20px 60px', borderRadius:'50px', 
-                                        fontSize:'2rem', fontWeight:'bold', cursor: isMyBid ? 'default' : 'pointer',
-                                        transform: isMyBid ? 'none' : 'scale(1.05)', 
-                                        boxShadow:'0 10px 30px rgba(0,0,0,0.3)',
-                                        transition: 'all 0.1s'
-                                    }}
-                                >
+                                <button onClick={() => placeBid(nextBid)} disabled={isMyBid} style={{background: isMyBid ? '#22c55e' : '#2563eb', color:'white', border:'none', padding:'20px 60px', borderRadius:'50px', fontSize:'2rem', fontWeight:'bold', cursor: isMyBid ? 'default' : 'pointer', transform: isMyBid ? 'none' : 'scale(1.05)', boxShadow:'0 10px 30px rgba(0,0,0,0.3)', transition: 'all 0.1s'}}>
                                     {isMyBid ? "✅ YOU LEAD" : `BID ${nextBid} Cr`}
                                 </button>
                             )
@@ -270,34 +178,92 @@ const AuctionPage = () => {
           )}
         </div>
 
-        {/* RIGHT: LEADERBOARD */}
-        <div className="team-stats-panel">
-          <h4 style={{borderBottom:'1px solid #ddd', paddingBottom:'10px'}}>Active Battle</h4>
-          {activeBidders.length === 0 && <small style={{color:'#999', fontStyle:'italic'}}>No active bid war</small>}
-          {activeBidders.map(teamName => (
-              <div key={teamName} style={{padding:'8px', background:'#fee2e2', color:'#991b1b', marginBottom:'8px', borderRadius:'6px', border:'1px solid #fca5a5', fontWeight:'bold', display:'flex', alignItems:'center', gap:'10px'}}>
-                  <div className="pulsate" style={{width:'8px', height:'8px', background:'red', borderRadius:'50%'}}></div>
-                  {teamName}
-              </div>
-          ))}
+        {/* --- RIGHT: ENHANCED STATS PANEL --- */}
+        <div className="team-stats-panel" style={{display:'flex', flexDirection:'column', gap:'10px'}}>
           
-          <h4 style={{marginTop:'20px', borderBottom:'1px solid #ddd', paddingBottom:'10px'}}>Standings</h4>
-          <div style={{overflowY:'auto', maxHeight:'400px', display:'flex', flexDirection:'column', gap:'8px'}}>
-             {activeTeams.map(t => (
-                 <div key={t.name} style={{
-                     padding:'10px', borderRadius:'8px', background:'white',
-                     borderLeft: `5px solid ${t.color}`,
-                     opacity: activeBidders.length === 2 && !activeBidders.includes(t.name) ? 0.4 : 1,
-                     transition: 'opacity 0.2s',
-                     boxShadow: currentBidder === t.name ? '0 0 0 2px #2563eb' : 'none'
-                 }}>
-                    <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-                        <strong style={{fontSize:'1.1rem'}}>{t.abbr}</strong>
-                        <span style={{background:'#eee', padding:'2px 8px', borderRadius:'10px', fontSize:'0.8rem'}}>{t.squad.length} / {config.maxPlayers}</span>
-                    </div>
-                    <div style={{fontSize:'0.9rem', color:'#666', marginTop:'2px'}}>Budget: <strong>{t.budget} Cr</strong></div>
+          {/* Active Battle (Always Visible) */}
+          <div style={{borderBottom:'1px solid #ddd', paddingBottom:'10px'}}>
+              <h4 style={{margin:'0 0 10px 0'}}>⚔️ Active Battle</h4>
+              {activeBidders.length === 0 && <small style={{color:'#999', fontStyle:'italic'}}>No active bid war</small>}
+              {activeBidders.map(teamName => (
+                  <div key={teamName} style={{padding:'8px', background:'#fee2e2', color:'#991b1b', marginBottom:'8px', borderRadius:'6px', border:'1px solid #fca5a5', fontWeight:'bold', display:'flex', alignItems:'center', gap:'10px'}}>
+                      <div className="pulsate" style={{width:'8px', height:'8px', background:'red', borderRadius:'50%'}}></div>
+                      {teamName}
+                  </div>
+              ))}
+          </div>
+
+          {/* TABS */}
+          <div style={{display:'flex', gap:'5px', marginBottom:'5px'}}>
+              <button 
+                  onClick={() => setRightTab('standings')}
+                  style={{flex:1, padding:'8px', cursor:'pointer', border:'none', borderRadius:'5px', background: rightTab === 'standings' ? '#2563eb' : '#e5e7eb', color: rightTab === 'standings' ? 'white' : '#666', fontWeight:'bold'}}
+              >
+                  Standings
+              </button>
+              <button 
+                  onClick={() => setRightTab('mysquad')}
+                  disabled={!myTeam}
+                  style={{flex:1, padding:'8px', cursor: myTeam ? 'pointer' : 'not-allowed', border:'none', borderRadius:'5px', background: rightTab === 'mysquad' ? '#2563eb' : '#e5e7eb', color: rightTab === 'mysquad' ? 'white' : '#666', fontWeight:'bold', opacity: myTeam ? 1 : 0.5}}
+              >
+                  My Squad
+              </button>
+          </div>
+
+          {/* CONTENT AREA */}
+          <div style={{flex:1, overflowY:'auto', maxHeight:'500px'}}>
+             
+             {/* 1. LEADERBOARD VIEW */}
+             {rightTab === 'standings' && (
+                 <div style={{display:'flex', flexDirection:'column', gap:'10px'}}>
+                     {activeTeams
+                        .sort((a,b) => b.budget - a.budget) // Sort by Budget High -> Low
+                        .map(t => {
+                             const stats = getTeamStats(t);
+                             return (
+                                 <div key={t.name} style={{
+                                     padding:'10px', borderRadius:'8px', background:'white',
+                                     borderLeft: `5px solid ${t.color}`,
+                                     opacity: activeBidders.length === 2 && !activeBidders.includes(t.name) ? 0.4 : 1,
+                                     boxShadow: currentBidder === t.name ? '0 0 0 2px #2563eb' : 'none'
+                                 }}>
+                                    <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                                        <strong style={{fontSize:'1rem'}}>{t.abbr}</strong>
+                                        <span style={{fontSize:'0.9rem', fontWeight:'bold', color: t.budget < 10 ? 'red' : '#166534'}}>{t.budget} Cr</span>
+                                    </div>
+                                    
+                                    {/* Budget Bar */}
+                                    <div style={{width:'100%', height:'4px', background:'#eee', marginTop:'5px', borderRadius:'2px'}}>
+                                        <div style={{width:`${stats.percentUsed}%`, height:'100%', background:t.color}}></div>
+                                    </div>
+
+                                    <div style={{display:'flex', justifyContent:'space-between', marginTop:'8px', fontSize:'0.75rem', color:'#666'}}>
+                                        <span>Players: <strong>{t.squad.length}/{config.maxPlayers}</strong></span>
+                                        <span>Foreign: <strong>{t.foreignCount}/{config.maxForeign}</strong></span>
+                                    </div>
+                                 </div>
+                             );
+                     })}
                  </div>
-             ))}
+             )}
+
+             {/* 2. MY SQUAD VIEW */}
+             {rightTab === 'mysquad' && myTeam && (
+                 <div>
+                     {myTeam.squad.length === 0 && <p style={{textAlign:'center', color:'#999', marginTop:'20px'}}>No players bought yet.</p>}
+                     {myTeam.squad.map(p => (
+                         <div key={p.id} style={{display:'flex', alignItems:'center', gap:'10px', padding:'8px', borderBottom:'1px solid #eee', background:'white'}}>
+                             <img src={p.img || DEFAULT_AVATAR} alt="" style={{width:'30px', height:'30px', borderRadius:'50%', objectFit:'cover'}} />
+                             <div style={{flex:1}}>
+                                 <div style={{fontSize:'0.9rem', fontWeight:'bold'}}>{p.name}</div>
+                                 <div style={{fontSize:'0.75rem', color:'#666'}}>{p.type}</div>
+                             </div>
+                             <div style={{fontWeight:'bold', color:'#166534', fontSize:'0.85rem'}}>{p.soldPrice} Cr</div>
+                         </div>
+                     ))}
+                 </div>
+             )}
+
           </div>
         </div>
       </div>

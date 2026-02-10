@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuction } from '../context/AuctionContext';
 import { IPL_TEAMS } from '../data/initialPlayers';
 
@@ -21,6 +21,15 @@ const LandingPage = () => {
 
   // Merge IPL Teams with Server Custom Teams
   const allAvailableTeams = [...IPL_TEAMS, ...(customTeams || [])];
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('room');
+    if (code) {
+        setRoomCodeInput(code);
+        setMode('join'); // Switch to join tab automatically
+    }
+  }, []);
 
   // --- ACTIONS ---
 
@@ -103,6 +112,17 @@ const LandingPage = () => {
             <h2 style={{color:'#1e3a8a', margin:0}}>Lobby: {roomId}</h2>
             <p style={{color:'#60a5fa', margin:0}}>Share code with bidders</p>
          </div>
+
+          <button 
+              onClick={() => {
+                  const link = `${window.location.origin}/?room=${roomId}`;
+                  navigator.clipboard.writeText(link);
+                  alert("Link copied: " + link);
+              }}
+              style={{marginLeft:'10px', background:'transparent', border:'1px solid #1e3a8a', color:'#1e3a8a', padding:'5px 10px', borderRadius:'5px', cursor:'pointer'}}
+          >
+              🔗 Copy Link
+          </button>
          <div style={{textAlign:'right'}}>
             <h3 style={{color:'#1e40af', margin:0}}>{activeTeams.length} Teams Joined</h3>
             {isHost && (

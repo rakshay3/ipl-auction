@@ -5,7 +5,7 @@ import { DEFAULT_AVATAR } from '../data/initialPlayers';
 const SummaryPage = () => {
   const { 
     activeTeams, unsoldPlayers, config, isHost, 
-    socket, resetGame // We might need a "Leave Room" function later
+    socket, resetGame, leaveGame // We might need a "Leave Room" function later
   } = useAuction();
 
   const [selectedTeam, setSelectedTeam] = useState(null);
@@ -186,7 +186,7 @@ const SummaryPage = () => {
             style={{background:'#dc2626'}}
             onClick={() => {
                 if(window.confirm("Are you sure you want to exit?")) {
-                    handleLeave();
+                    leaveGame();
                 }
             }}
           >
