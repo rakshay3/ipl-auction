@@ -160,33 +160,37 @@ function handleGameEvents(io, socket, rooms) {
 
     // --- HANDLERS ---
 
-    socket.on(EVENTS.JOIN, ({ roomId, userName, isHost }) => {
+    socket.on(EVENTS.JOIN, ({ roomId, userName, isHost, create }) => { // <--- Added 'create' param
         socket.join(roomId);
+        
+        // CHECK IF ROOM EXISTS
         if (!rooms[roomId]) {
-            if (isHost) { 
+            // ONLY create if the 'create' flag is explicitly true
+            if (isHost && create) { 
                 rooms[roomId] = JSON.parse(JSON.stringify(INITIAL_STATE)); 
                 rooms[roomId].roomId = roomId; 
                 rooms[roomId].hostId = socket.id; 
                 console.log(`🏠 ROOM CREATED: ${roomId}`); 
-            } else { socket.emit(EVENTS.ERROR, "Room does not exist."); return; }
+            } else { 
+                // If trying to join/reconnect to a dead room (even as host), FAIL.
+                socket.emit(EVENTS.ERROR, "Room does not exist."); 
+                return; 
+            }
         }
+        
         const room = rooms[roomId];
         
-        // Host Reconnect Check (by name)
+        // Host Reconnect Check
         if(isHost && room.connectedUsers.some(u => u.isHost && u.name === userName)) {
-             room.hostId = socket.id; // Update Host Socket
+             room.hostId = socket.id; 
         }
 
-        // RECONNECTION LOGIC:
-        // Check if this user (by Name) already owns a team
+        // Reclaim Team if exists
         const existingTeam = room.activeTeams.find(t => t.ownerName === userName);
         if (existingTeam) {
-            // Re-assign the team to the new socket ID
             existingTeam.ownerId = socket.id;
-            console.log(`♻️  ${userName} reconnected and reclaimed ${existingTeam.name}`);
         }
 
-        // Update Connected Users List
         const existingUser = room.connectedUsers.find(u => u.name === userName);
         if(existingUser) {
             existingUser.id = socket.id;
@@ -195,7 +199,6 @@ function handleGameEvents(io, socket, rooms) {
             room.connectedUsers.push({ id: socket.id, name: userName, isHost, isReady: isHost });
         }
         
-        // addToFeed(room, `${userName} joined.`, 'INFO'); // Optional: Reduce spam
         broadcastState(roomId);
     });
 
@@ -239,21 +242,30 @@ function handleGameEvents(io, socket, rooms) {
         broadcastState(roomId);
     });
 
-    socket.on(EVENTS.VOTE_FINISH, ({ roomId }) => {
+   socket.on(EVENTS.VOTE_FINISH, ({ roomId }) => {
         const room = rooms[roomId];
         if(!room) return;
+        
+        // 1. Check Min Players
         const allMet = room.activeTeams.every(t => t.squad.length >= room.config.minPlayers);
         if(!allMet) return socket.emit(EVENTS.ERROR, "All teams must meet minimum player count!");
 
-        if(!room.finishVotes.includes(socket.id)) {
-            room.finishVotes.push(socket.id);
-            addToFeed(room, `✅ A user voted to Finish (${room.finishVotes.length}/${room.connectedUsers.length})`, 'INFO');
+        const user = room.connectedUsers.find(u => u.id === socket.id);
+        const name = user ? user.name : "Unknown";
+
+        // 2. Toggle Vote
+        if(room.finishVotes.includes(socket.id)) {
+            room.finishVotes = room.finishVotes.filter(id => id !== socket.id);
+            addToFeed(room, `❌ ${name} cancelled finish vote.`, 'INFO');
         } else {
-             // Toggle off
-             room.finishVotes = room.finishVotes.filter(id => id !== socket.id);
+            room.finishVotes.push(socket.id);
+            addToFeed(room, `✅ ${name} voted to Finish (${room.finishVotes.length}/${room.connectedUsers.length}).`, 'SUCCESS');
         }
 
-        if(room.connectedUsers.length > 0 && room.finishVotes.length === room.connectedUsers.length) {
+        // 3. Check Consensus
+        // Only finish if EVERY connected user has voted
+        if(room.connectedUsers.length > 0 && room.finishVotes.length >= room.connectedUsers.length) {
+            if(room.timerInterval) clearInterval(room.timerInterval);
             room.currentPage = 'summary';
             addToFeed(room, `🏁 Consensus Reached! Auction Finished.`, 'SUCCESS');
             broadcastState(roomId);
@@ -301,18 +313,42 @@ function handleGameEvents(io, socket, rooms) {
     socket.on(EVENTS.BID, ({ roomId, amount }) => {
         const room = rooms[roomId];
         if(!room || room.auctionStatus !== 'REVEALED' || room.isPaused) return;
+
         const team = room.activeTeams.find(t => t.ownerId === socket.id);
         if(!team) return socket.emit(EVENTS.ERROR, "No Team Assigned");
+
+        // --- EXISTING CHECKS ---
         if (room.activeBidders.length >= 2 && !room.activeBidders.includes(team.name)) return socket.emit(EVENTS.ERROR, "Bid War Locked!");
         if (team.budget < amount) return socket.emit(EVENTS.ERROR, "Insufficient Budget");
-        if (room.currentBid === 0) { if (amount < room.currentPlayer.basePrice) return socket.emit(EVENTS.ERROR, `Bid must start at Base Price`); } 
-        else { if (amount <= room.currentBid) return socket.emit(EVENTS.ERROR, "Bid must be higher"); }
-        room.currentBid = amount; room.currentBidder = team.name;
+
+        // --- NEW: SQUAD LIMIT CHECKS ---
+        
+        // 1. Check Max Squad Size
+        if (team.squad.length >= room.config.maxPlayers) {
+            return socket.emit(EVENTS.ERROR, `Squad Full! (${room.config.maxPlayers} players)`);
+        }
+
+        // 2. Check Foreign Player Limit
+        if (room.currentPlayer.isForeign && team.foreignCount >= room.config.maxForeign) {
+            return socket.emit(EVENTS.ERROR, `Foreign Limit Reached! (${room.config.maxForeign} max)`);
+        }
+
+        // --- END NEW CHECKS ---
+
+        // Logic for First Bid vs Increment
+        if (room.currentBid === 0) { 
+             if (amount < room.currentPlayer.basePrice) return socket.emit(EVENTS.ERROR, `Bid must start at Base Price`); 
+        } else { 
+             if (amount <= room.currentBid) return socket.emit(EVENTS.ERROR, "Bid must be higher"); 
+        }
+
+        room.currentBid = amount; 
+        room.currentBidder = team.name;
         if(!room.activeBidders.includes(team.name)) room.activeBidders.push(team.name);
         room.timer = room.activeBidders.length > 1 ? 10 : room.config.defaultTimer;
-        addToFeed(room, `${team.name} bid ${amount} Cr`, 'BID'); broadcastState(roomId);
+        addToFeed(room, `${team.name} bid ${amount} Cr`, 'BID'); 
+        broadcastState(roomId);
     });
-
     socket.on(EVENTS.WITHDRAW, ({ roomId }) => {
         const room = rooms[roomId]; if(!room) return;
         const team = room.activeTeams.find(t => t.ownerId === socket.id);

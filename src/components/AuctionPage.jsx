@@ -5,11 +5,13 @@ import { DEFAULT_AVATAR } from '../data/initialPlayers';
 const AuctionPage = () => {
   const { 
     isHost, socket,
-    activeTeams, playerSets, config, 
+    activeTeams, playerSets, unsoldPlayers, config, 
     currentAuctionState, feed, 
     startAutoLoop, placeBid, pauseGame, withdrawBid, requestTime, changeTimer,
     currentSetIndex, setCurrentPage, canFinishAuction,
-    sellPlayer, markUnsold 
+    sellPlayer, markUnsold,
+    voteFinish, finishVotes, connectedUsers, endRoom,
+    deletePlayerFromSet // Needed for Set Tab controls
   } = useAuction();
 
   // Destructure State
@@ -23,7 +25,8 @@ const AuctionPage = () => {
   
   // Local State
   const [newTimerVal, setNewTimerVal] = useState(45);
-  const [rightTab, setRightTab] = useState('standings'); // 'standings' | 'mysquad'
+  const [rightTab, setRightTab] = useState('teams'); // 'teams' | 'set' | 'unsold'
+  const [expandedTeamId, setExpandedTeamId] = useState(null); // For accordion view
   const feedRef = useRef(null);
 
   // Auto-scroll feed
@@ -53,6 +56,11 @@ const AuctionPage = () => {
       return { bats, bowls, percentUsed };
   };
 
+  const toggleTeamView = (teamId) => {
+      if (expandedTeamId === teamId) setExpandedTeamId(null);
+      else setExpandedTeamId(teamId);
+  };
+
   // --- RENDER ---
 
   if (!currentSet) return <div className="container" style={{color:'white', textAlign:'center', marginTop:'50px'}}><h2>Loading Set...</h2></div>;
@@ -67,17 +75,35 @@ const AuctionPage = () => {
         </div>
         
         {/* TOP CONTROLS */}
-        <div>
+        <div style={{display:'flex', gap:'10px', alignItems:'center'}}>
+            
+            {/* VOTE FINISH */}
+            <button 
+                className="btn-finish" 
+                onClick={voteFinish}
+                disabled={!canFinishAuction()}
+                style={{
+                    background: finishVotes.includes(socket?.id) ? '#22c55e' : (canFinishAuction() ? '#2563eb' : '#9ca3af'),
+                    opacity: canFinishAuction() ? 1 : 0.6,
+                    cursor: canFinishAuction() ? 'pointer' : 'not-allowed',
+                    border: finishVotes.includes(socket?.id) ? '2px solid white' : 'none',
+                    minWidth: '140px'
+                }}
+            >
+                {finishVotes.includes(socket?.id) ? `✅ Voted (${finishVotes.length}/${connectedUsers.length})` : `🏁 Finish (${finishVotes.length}/${connectedUsers.length})`}
+            </button>
+
+            {/* HOST CONTROLS */}
             {isHost && (
-                <div style={{display:'flex', gap:'10px', alignItems:'center'}}>
+                <>
                    <div style={{background:'rgba(255,255,255,0.2)', padding:'5px 10px', borderRadius:'5px', display:'flex', gap:'5px', alignItems:'center'}}>
-                      <span style={{color:'white', fontSize:'0.8rem'}}>Timer:</span>
+                      <span style={{color:'white', fontSize:'0.8rem'}}>Time:</span>
                       <input type="number" value={newTimerVal} onChange={(e) => setNewTimerVal(e.target.value)} style={{width:'40px', padding:'5px', borderRadius:'3px', border:'none'}} />
                       <button onClick={() => changeTimer(newTimerVal)} style={{cursor:'pointer', background:'white', border:'none', borderRadius:'3px', padding:'5px'}}>Set</button>
                    </div>
-                   <button className="primary-btn" onClick={pauseGame} style={{background: isPaused ? '#22c55e' : '#f59e0b', minWidth:'80px'}}>{isPaused ? "RESUME" : "PAUSE"}</button>
-                   <button className="btn-finish" onClick={() => setCurrentPage('summary')} disabled={!canFinishAuction()} style={{opacity: canFinishAuction() ? 1 : 0.5, cursor: canFinishAuction() ? 'pointer' : 'not-allowed'}}>🏁 Finish</button>
-                </div>
+                   <button className="primary-btn" onClick={pauseGame} style={{background: isPaused ? '#f59e0b' : '#3b82f6', minWidth:'80px'}}>{isPaused ? "RESUME" : "PAUSE"}</button>
+                   <button onClick={() => { if(window.confirm("DANGER: End Room?")) endRoom(); }} style={{background: '#ef4444', color:'white', border:'none', padding:'10px', borderRadius:'5px', cursor:'pointer', fontWeight:'bold'}} title="Force Close Room">⛔ END</button>
+                </>
             )}
         </div>
       </div>
@@ -178,10 +204,10 @@ const AuctionPage = () => {
           )}
         </div>
 
-        {/* --- RIGHT: ENHANCED STATS PANEL --- */}
+        {/* --- RIGHT: UPDATED TABBED PANEL --- */}
         <div className="team-stats-panel" style={{display:'flex', flexDirection:'column', gap:'10px'}}>
           
-          {/* Active Battle (Always Visible) */}
+          {/* Active Battle */}
           <div style={{borderBottom:'1px solid #ddd', paddingBottom:'10px'}}>
               <h4 style={{margin:'0 0 10px 0'}}>⚔️ Active Battle</h4>
               {activeBidders.length === 0 && <small style={{color:'#999', fontStyle:'italic'}}>No active bid war</small>}
@@ -195,72 +221,140 @@ const AuctionPage = () => {
 
           {/* TABS */}
           <div style={{display:'flex', gap:'5px', marginBottom:'5px'}}>
-              <button 
-                  onClick={() => setRightTab('standings')}
-                  style={{flex:1, padding:'8px', cursor:'pointer', border:'none', borderRadius:'5px', background: rightTab === 'standings' ? '#2563eb' : '#e5e7eb', color: rightTab === 'standings' ? 'white' : '#666', fontWeight:'bold'}}
-              >
-                  Standings
-              </button>
-              <button 
-                  onClick={() => setRightTab('mysquad')}
-                  disabled={!myTeam}
-                  style={{flex:1, padding:'8px', cursor: myTeam ? 'pointer' : 'not-allowed', border:'none', borderRadius:'5px', background: rightTab === 'mysquad' ? '#2563eb' : '#e5e7eb', color: rightTab === 'mysquad' ? 'white' : '#666', fontWeight:'bold', opacity: myTeam ? 1 : 0.5}}
-              >
-                  My Squad
-              </button>
+              {['teams', 'set', 'unsold'].map(tab => (
+                  <button 
+                    key={tab}
+                    onClick={() => setRightTab(tab)}
+                    style={{
+                        flex:1, padding:'8px', cursor:'pointer', border:'none', borderRadius:'5px', 
+                        background: rightTab === tab ? '#2563eb' : '#e5e7eb', 
+                        color: rightTab === tab ? 'white' : '#666', 
+                        fontWeight:'bold', textTransform:'capitalize'
+                    }}
+                  >
+                      {tab}
+                  </button>
+              ))}
           </div>
 
           {/* CONTENT AREA */}
           <div style={{flex:1, overflowY:'auto', maxHeight:'500px'}}>
              
-             {/* 1. LEADERBOARD VIEW */}
-             {rightTab === 'standings' && (
+             {/* 1. TEAMS VIEW (ACCORDION) */}
+             {rightTab === 'teams' && (
                  <div style={{display:'flex', flexDirection:'column', gap:'10px'}}>
                      {activeTeams
-                        .sort((a,b) => b.budget - a.budget) // Sort by Budget High -> Low
+                        .sort((a,b) => b.budget - a.budget)
                         .map(t => {
                              const stats = getTeamStats(t);
+                             const isExpanded = expandedTeamId === t.id;
                              return (
-                                 <div key={t.name} style={{
-                                     padding:'10px', borderRadius:'8px', background:'white',
-                                     borderLeft: `5px solid ${t.color}`,
-                                     opacity: activeBidders.length === 2 && !activeBidders.includes(t.name) ? 0.4 : 1,
-                                     boxShadow: currentBidder === t.name ? '0 0 0 2px #2563eb' : 'none'
-                                 }}>
-                                    <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-                                        <strong style={{fontSize:'1rem'}}>{t.abbr}</strong>
-                                        <span style={{fontSize:'0.9rem', fontWeight:'bold', color: t.budget < 10 ? 'red' : '#166534'}}>{t.budget} Cr</span>
-                                    </div>
-                                    
-                                    {/* Budget Bar */}
-                                    <div style={{width:'100%', height:'4px', background:'#eee', marginTop:'5px', borderRadius:'2px'}}>
-                                        <div style={{width:`${stats.percentUsed}%`, height:'100%', background:t.color}}></div>
-                                    </div>
+                                 <div key={t.id} style={{background:'white', borderRadius:'8px', overflow:'hidden', boxShadow:'0 1px 3px rgba(0,0,0,0.1)'}}>
+                                     {/* Team Header */}
+                                     <div 
+                                        onClick={() => toggleTeamView(t.id)}
+                                        style={{
+                                            padding:'10px', cursor:'pointer',
+                                            borderLeft: `5px solid ${t.color}`,
+                                            background: isExpanded ? '#f8fafc' : 'white',
+                                            display:'flex', justifyContent:'space-between', alignItems:'center'
+                                        }}
+                                     >
+                                        <div>
+                                            <strong style={{fontSize:'1rem', display:'block'}}>{t.abbr}</strong>
+                                            <small style={{color:'#666'}}>{t.squad.length}/{config.maxPlayers} Players</small>
+                                        </div>
+                                        <div style={{textAlign:'right'}}>
+                                            <div style={{fontWeight:'bold', color: t.budget < 10 ? 'red' : '#166534'}}>{t.budget} Cr</div>
+                                            <small style={{fontSize:'0.7rem', color:'#3b82f6'}}>{isExpanded ? "Hide" : "View"}</small>
+                                        </div>
+                                     </div>
 
-                                    <div style={{display:'flex', justifyContent:'space-between', marginTop:'8px', fontSize:'0.75rem', color:'#666'}}>
-                                        <span>Players: <strong>{t.squad.length}/{config.maxPlayers}</strong></span>
-                                        <span>Foreign: <strong>{t.foreignCount}/{config.maxForeign}</strong></span>
-                                    </div>
+                                     {/* Expanded Squad View */}
+                                     {isExpanded && (
+                                         <div style={{borderTop:'1px solid #eee', background:'#f8f9fa', padding:'10px'}}>
+                                             <div style={{marginBottom:'5px', fontSize:'0.75rem', color:'#666'}}>Foreign: {t.foreignCount}/{config.maxForeign}</div>
+                                             {t.squad.length === 0 ? <small style={{fontStyle:'italic', color:'#999'}}>No players yet</small> : (
+                                                 <div style={{display:'flex', flexDirection:'column', gap:'5px'}}>
+                                                     {t.squad.map(p => (
+                                                         <div key={p.id} style={{display:'flex', justifyContent:'space-between', fontSize:'0.85rem', borderBottom:'1px solid #e5e7eb', paddingBottom:'2px'}}>
+                                                             <span>{p.name}</span>
+                                                             <span style={{fontWeight:'bold', color:'#333'}}>{p.soldPrice}</span>
+                                                         </div>
+                                                     ))}
+                                                 </div>
+                                             )}
+                                         </div>
+                                     )}
                                  </div>
                              );
                      })}
                  </div>
              )}
 
-             {/* 2. MY SQUAD VIEW */}
-             {rightTab === 'mysquad' && myTeam && (
+             {/* 2. SET VIEW */}
+             {rightTab === 'set' && (
                  <div>
-                     {myTeam.squad.length === 0 && <p style={{textAlign:'center', color:'#999', marginTop:'20px'}}>No players bought yet.</p>}
-                     {myTeam.squad.map(p => (
-                         <div key={p.id} style={{display:'flex', alignItems:'center', gap:'10px', padding:'8px', borderBottom:'1px solid #eee', background:'white'}}>
-                             <img src={p.img || DEFAULT_AVATAR} alt="" style={{width:'30px', height:'30px', borderRadius:'50%', objectFit:'cover'}} />
-                             <div style={{flex:1}}>
-                                 <div style={{fontSize:'0.9rem', fontWeight:'bold'}}>{p.name}</div>
-                                 <div style={{fontSize:'0.75rem', color:'#666'}}>{p.type}</div>
-                             </div>
-                             <div style={{fontWeight:'bold', color:'#166534', fontSize:'0.85rem'}}>{p.soldPrice} Cr</div>
+                     {/* Current Set */}
+                     <div style={{marginBottom:'20px'}}>
+                         <h5 style={{margin:'0 0 10px 0', borderBottom:'2px solid #2563eb', paddingBottom:'5px', color:'#1e3a8a'}}>
+                             Current: {currentSet.setName}
+                         </h5>
+                         <ul style={{listStyle:'none', padding:0, margin:0}}>
+                             {currentSet.players.map(p => (
+                                 <li key={p.id} style={{display:'flex', justifyContent:'space-between', alignItems:'center', padding:'8px', borderBottom:'1px solid #eee', background: currentPlayer?.id === p.id ? '#dbeafe' : 'white'}}>
+                                     <span style={{fontSize:'0.9rem', color: currentPlayer?.id === p.id ? '#1e40af' : '#333'}}>
+                                         {p.name} {currentPlayer?.id === p.id && " (Live)"}
+                                     </span>
+                                     {isHost && (
+                                         <button 
+                                            onClick={() => {
+                                                if(window.confirm(`Remove ${p.name} from set?`)) deletePlayerFromSet(currentSetIndex, p.id)
+                                            }} 
+                                            style={{background:'#fee2e2', color:'red', border:'none', borderRadius:'50%', width:'24px', height:'24px', cursor:'pointer', fontSize:'0.8rem'}}
+                                         >
+                                             ✕
+                                         </button>
+                                     )}
+                                 </li>
+                             ))}
+                             {currentSet.players.length === 0 && <li style={{color:'#999', fontStyle:'italic', padding:'10px'}}>Set Completed</li>}
+                         </ul>
+                     </div>
+
+                     {/* Upcoming Sets */}
+                     <div>
+                         <h5 style={{margin:'0 0 10px 0', borderBottom:'2px solid #999', paddingBottom:'5px', color:'#666'}}>
+                             Upcoming Sets
+                         </h5>
+                         <ul style={{listStyle:'none', padding:0, margin:0}}>
+                             {playerSets.map((s, idx) => {
+                                 if(idx <= currentSetIndex) return null; // Skip past/current sets
+                                 return (
+                                     <li key={idx} style={{padding:'8px', borderBottom:'1px solid #eee', color:'#666', display:'flex', justifyContent:'space-between'}}>
+                                         <span>▶ {s.setName}</span>
+                                         <span style={{background:'#eee', padding:'2px 6px', borderRadius:'10px', fontSize:'0.7rem'}}>{s.players.length}</span>
+                                     </li>
+                                 );
+                             })}
+                         </ul>
+                     </div>
+                 </div>
+             )}
+
+             {/* 3. UNSOLD VIEW */}
+             {rightTab === 'unsold' && (
+                 <div>
+                     {unsoldPlayers.length === 0 ? <p style={{textAlign:'center', color:'#999', marginTop:'20px'}}>No unsold players yet.</p> : (
+                         <div style={{display:'flex', flexDirection:'column', gap:'5px'}}>
+                             {unsoldPlayers.map(p => (
+                                 <div key={p.id} style={{padding:'10px', background:'#fee2e2', borderRadius:'5px', borderLeft:'4px solid #ef4444'}}>
+                                     <div style={{fontWeight:'bold', color:'#991b1b'}}>{p.name}</div>
+                                     <div style={{fontSize:'0.8rem', color:'#7f1d1d'}}>{p.type} | Base: {p.basePrice} Cr</div>
+                                 </div>
+                             ))}
                          </div>
-                     ))}
+                     )}
                  </div>
              )}
 

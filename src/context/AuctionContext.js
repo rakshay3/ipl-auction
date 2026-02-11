@@ -49,8 +49,11 @@ export const AuctionProvider = ({ children }) => {
       const savedSession = localStorage.getItem(SESSION_KEY);
       if (savedSession) {
         const { roomId, userName, isHost } = JSON.parse(savedSession);
-        // Attempt to join
-        newSocket.emit('JOIN_ROOM', { roomId, userName, isHost });
+        console.log(`🔄 Attempting auto-reconnect for ${userName}`);
+        
+        // IMPORTANT: We do NOT send 'create: true' here. 
+        // If the server restarted, this MUST fail so we can clear storage.
+        newSocket.emit('JOIN_ROOM', { roomId, userName, isHost, create: false });
       }
     });
 
@@ -58,18 +61,20 @@ export const AuctionProvider = ({ children }) => {
 
     // MAIN LISTENER
     newSocket.on('STATE_UPDATE', (serverState) => {
-      // 1. CONFIRM ROOM JOIN (This fixes the bug)
+      // Confirm Room Join
       if (serverState.roomId) {
           setRoomId(serverState.roomId);
-          // Only save session if join was successful
-          const currentUser = serverState.connectedUsers.find(u => u.id === newSocket.id);
-          if(currentUser) {
+          
+          // Identify self to verify Host status
+          const me = serverState.connectedUsers.find(u => u.id === newSocket.id);
+          if (me) {
+              setIsHost(me.isHost);
+              // Save validated session
               localStorage.setItem(SESSION_KEY, JSON.stringify({ 
                   roomId: serverState.roomId, 
-                  userName: currentUser.name, 
-                  isHost: currentUser.isHost 
+                  userName: me.name, 
+                  isHost: me.isHost 
               }));
-              setIsHost(currentUser.isHost);
           }
       }
 
@@ -95,16 +100,18 @@ export const AuctionProvider = ({ children }) => {
       });
     });
 
-    // ERROR HANDLING
+    // ERROR HANDLING & SESSION WIPING
     newSocket.on('ERROR_MSG', (msg) => {
-      alert(`⚠️ ${msg}`);
-      
-      // If Room Invalid -> Clear Everything
+      alert(`⚠️ Error: ${msg}`);
+      // Handle Invalid Room (Server Restarted or Wrong Code)
       if (msg === "Room does not exist.") {
-        localStorage.removeItem(SESSION_KEY);
-        setRoomId(null); // Go back to Landing
+        console.warn("❌ Session Invalid: Room not found. Clearing storage.");
+        localStorage.removeItem(SESSION_KEY); // Wipe storage
+        setRoomId(null);
         setCurrentPage('landing');
-        window.history.replaceState({}, document.title, "/");
+        window.history.replaceState({}, document.title, "/"); // Clear URL params
+      } else {
+        alert(`⚠️ ${msg}`);
       }
     });
 
@@ -115,24 +122,24 @@ export const AuctionProvider = ({ children }) => {
 
   const joinGame = (code, name, host = false) => {
     if (!socket) return;
-    
-    // CHANGE: We DO NOT setRoomId here. We wait for server response.
-    // setRoomId(code); <--- REMOVED
-    // setIsHost(host); <--- REMOVED
-    
-    socket.emit('JOIN_ROOM', { roomId: code, userName: name, isHost: host });
+    // STARTING NEW GAME: We send 'create: true' ONLY if we are the host starting fresh
+    const isCreating = host; 
+    socket.emit('JOIN_ROOM', { roomId: code, userName: name, isHost: host, create: isCreating });
   };
 
   const leaveGame = () => {
-      localStorage.removeItem(SESSION_KEY);
-      window.location.href = "/"; 
+      console.log("🚪 Leaving Game...");
+      localStorage.removeItem(SESSION_KEY); // 1. Clear Storage
+      setRoomId(null); // 2. Clear State
+      if(socket) socket.disconnect(); // 3. Kill Socket
+      window.location.href = "/"; // 4. Hard Refresh
   };
 
+  // ... (Keep all other actions exactly the same) ...
   const updateSettings = (newConfig) => socket?.emit('UPDATE_SETTINGS', { roomId, config: newConfig });
   const claimTeam = (team) => socket?.emit('CLAIM_TEAM', { roomId, team });
   const addCustomTeam = (team) => socket?.emit('ADD_CUSTOM_TEAM', { roomId, team });
   const startGame = () => socket?.emit('START_GAME', { roomId });
-  
   const importPlayersBulk = (entries) => {
     const updatedSets = [];
     entries.forEach(entry => {
@@ -143,29 +150,23 @@ export const AuctionProvider = ({ children }) => {
     });
     socket.emit('UPLOAD_DATA', { roomId, sets: updatedSets });
   };
-
   const toggleReady = () => socket?.emit('PLAYER_READY', { roomId });
   const startAuction = () => socket?.emit('START_AUCTION', { roomId });
   const addPlayerToSet = (setIndex, player) => socket?.emit('ADD_PLAYER', { roomId, setIndex, player });
   const deletePlayerFromSet = (setIndex, playerId) => socket?.emit('DELETE_PLAYER', { roomId, setIndex, playerId });
-
   const startAutoLoop = () => socket?.emit('START_TIMER', { roomId });
   const pauseGame = () => socket?.emit('PAUSE_RESUME', { roomId });
   const placeBid = (amount) => socket?.emit('BID', { roomId, amount });
   const withdrawBid = () => socket?.emit('WITHDRAW', { roomId });
   const requestTime = () => socket?.emit('NEED_TIME', { roomId });
   const changeTimer = (seconds) => socket?.emit('CHANGE_TIMER', { roomId, seconds });
-
   const voteFinish = () => socket?.emit('VOTE_FINISH', { roomId });
   const endRoom = () => socket?.emit('END_ROOM', { roomId }); 
-
   const sellPlayer = (player, teamName, soldPrice) => socket?.emit('SOLD', { roomId, teamName, price: soldPrice });
   const markUnsold = (player) => socket?.emit('UNSOLD', { roomId });
   const startReveal = (player) => {}; 
-
   const resetGame = () => window.location.reload(); 
   const navigateTo = (page) => socket?.emit('NAVIGATE', { roomId, page });
-  
   const canFinishAuction = () => activeTeams.every(team => team.squad && team.squad.length >= config.minPlayers);
 
   return (
