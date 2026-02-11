@@ -11,6 +11,7 @@ const EVENTS = {
     UPLOAD_DATA: 'UPLOAD_DATA', 
     ADD_PLAYER: 'ADD_PLAYER',
     DELETE_PLAYER: 'DELETE_PLAYER',
+    DELETE_SET: 'DELETE_SET',
     PLAYER_READY: 'PLAYER_READY', 
     START_AUCTION: 'START_AUCTION',
     BID: 'BID',
@@ -381,6 +382,26 @@ function handleGameEvents(io, socket, rooms) {
     socket.on(EVENTS.UPLOAD_DATA, ({ roomId, sets }) => { if(rooms[roomId]) { rooms[roomId].playerSets = sets; rooms[roomId].currentPage = 'review'; broadcastState(roomId); } });
     socket.on(EVENTS.ADD_PLAYER, ({ roomId, setIndex, player }) => { const r = rooms[roomId]; if(r) { r.playerSets[setIndex].players.push(player); broadcastState(roomId); }});
     socket.on(EVENTS.DELETE_PLAYER, ({ roomId, setIndex, playerId }) => { const r = rooms[roomId]; if(r) { r.playerSets[setIndex].players = r.playerSets[setIndex].players.filter(p => p.id !== playerId); broadcastState(roomId); }});
+    socket.on(EVENTS.DELETE_SET, ({ roomId, setIndex }) => {
+        const room = rooms[roomId];
+        if(!room || !room.playerSets[setIndex]) return;
+        
+        // Prevent deleting the currently active set to avoid crashing the game loop
+        if(setIndex === room.currentSetIndex && room.auctionStatus !== 'IDLE') {
+             return socket.emit(EVENTS.ERROR, "Cannot delete the active set while playing!");
+        }
+
+        const setName = room.playerSets[setIndex].setName;
+        room.playerSets.splice(setIndex, 1);
+        
+        // If we deleted a set before the current one, adjust index (rare edge case)
+        if(setIndex < room.currentSetIndex) {
+            room.currentSetIndex--;
+        }
+
+        addToFeed(room, `🗑️ Set "${setName}" deleted by Host.`, 'INFO');
+        broadcastState(roomId);
+    });
     socket.on(EVENTS.NAVIGATE, ({ roomId, page }) => { if(rooms[roomId]) { rooms[roomId].currentPage = page; broadcastState(roomId); }});
     socket.on(EVENTS.UPDATE_SETTINGS, ({ roomId, config }) => { const r = rooms[roomId]; if(r) { r.config = config; r.activeTeams.forEach(t => t.budget = parseFloat(config.budget)); broadcastState(roomId); }});
 }

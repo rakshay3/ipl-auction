@@ -168,7 +168,7 @@ export const AuctionProvider = ({ children }) => {
   const resetGame = () => window.location.reload(); 
   const navigateTo = (page) => socket?.emit('NAVIGATE', { roomId, page });
   const canFinishAuction = () => activeTeams.every(team => team.squad && team.squad.length >= config.minPlayers);
-
+  const deleteSet = (setIndex) => socket?.emit('DELETE_SET', { roomId, setIndex });
   return (
     <AuctionContext.Provider value={{
       socket, isConnected, roomId, isHost,
@@ -180,7 +180,7 @@ export const AuctionProvider = ({ children }) => {
       joinGame, leaveGame,
       updateSettings, claimTeam, addCustomTeam, startGame,
       importPlayersBulk, toggleReady, startAuction,
-      addPlayerToSet, deletePlayerFromSet,
+      addPlayerToSet, deletePlayerFromSet,deleteSet,
       
       startAutoLoop, pauseGame, placeBid, withdrawBid, requestTime, changeTimer,
       voteFinish, endRoom,
