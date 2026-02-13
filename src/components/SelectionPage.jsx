@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuction } from '../context/AuctionContext';
+import { DEFAULT_AVATAR } from '../data/initialPlayers'; // Import default avatar
 
 const SelectionPage = () => {
   const { importPlayersBulk, roomId, isHost } = useAuction(); 
@@ -27,11 +28,13 @@ const SelectionPage = () => {
 
     const reader = new FileReader();
     reader.onload = (event) => {
+      // Pass the text content to our parser
       parseAndLoad(event.target.result);
     };
     reader.readAsText(file);
   };
 
+  // Helper to load predefined server files (optional feature)
   const loadDataset = async (fileName) => {
     setLoading(true);
     try {
@@ -46,46 +49,73 @@ const SelectionPage = () => {
   };
 
   const parseAndLoad = (csvText) => {
-    const lines = csvText.split('\n');
+    const lines = csvText.split(/\r?\n/); // Handle Windows/Mac line endings
     const playersToImport = [];
 
-    lines.forEach((line) => {
-      const parts = line.split(',');
-      if (parts.length >= 4) { 
-        const name = parts[0]?.trim();
-        const setName = parts[1]?.trim(); 
-        const role = parts[2]?.trim();
-        const country = parts[3]?.trim();
-        const price = parseFloat(parts[4]?.trim()) || 20;
-        const img = parts[5]?.trim() || "";
+    console.log(`📄 parsing ${lines.length} lines...`);
 
-        if (!name || name.toLowerCase() === "name") return;
+    lines.forEach((line, index) => {
+      // Skip empty lines
+      if (!line.trim()) return;
 
-        if (name && setName) {
-          playersToImport.push({
-            targetSetName: setName,
-            player: {
-              id: Date.now() + Math.random(),
-              name, type: role, country,
-              isForeign: country.toLowerCase() !== 'india',
-              basePrice: price, img
-            }
-          });
+      const parts = line.split(',').map(p => p.trim());
+      
+      // We expect at least NAME (0) and SET (1)
+      if (parts.length >= 2) { 
+        const name = parts[0];
+        const setName = parts[1];
+        
+        // Skip header row
+        if (!name || name.toLowerCase() === "name" || !setName) return;
+
+        const role = parts[2] || "Unknown";
+        const country = parts[3] || "India";
+        
+        // Price Parsing
+        let price = 0.2; 
+        const priceRaw = parts[4];
+        if (priceRaw) {
+            const p = priceRaw.toUpperCase();
+            if (p.includes('C')) price = parseFloat(p.replace('C', '')); 
+            else if (p.includes('L')) price = parseFloat(p.replace('L', '')) / 100;
+            else price = parseFloat(p) / 10000000;
         }
+
+        // --- IMAGE DEBUGGING ---
+        const imageRaw = parts[5]; // This is the column we care about
+        console.log(`Row ${index}: ${name} -> Image Column: "${imageRaw}"`);
+
+        let finalImage = DEFAULT_AVATAR;
+        
+        if (imageRaw && imageRaw.length > 3) { // Ensure it's not just a stray character
+            if (imageRaw.startsWith('http')) {
+                finalImage = imageRaw;
+            } else {
+                // FORCE THE SLASH to ensure path is absolute relative to public
+                finalImage = `/players/${imageRaw}`;
+            }
+        }
+
+        playersToImport.push({
+          targetSetName: setName,
+          player: {
+            id: Math.random().toString(36).substr(2, 9),
+            name, 
+            type: role, 
+            country,
+            isForeign: country.toLowerCase() !== 'india',
+            basePrice: price, 
+            img: finalImage // <--- Check this in console
+          }
+        });
       }
     });
 
     if (playersToImport.length > 0) {
-      // 1. Send data to server
+      console.log("✅ Importing players:", playersToImport);
       importPlayersBulk(playersToImport);
-      setLoading(false);
-      
-      // NOTE: We do NOT call setCurrentPage('review') here.
-      // The server will receive the data, set page to 'review', 
-      // and send a STATE_UPDATE which triggers the navigation.
-      
     } else {
-      alert("No valid data found.");
+      alert("No valid data found in CSV.");
       setLoading(false);
     }
   };
@@ -110,7 +140,7 @@ const SelectionPage = () => {
 
       <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', marginTop: '30px'}}>
         
-        {/* CARD 1: OFFICIAL DATASETS */}
+        {/* CARD 1: OFFICIAL DATASETS (Optional) */}
         <div style={{
           background: 'white', padding: '30px', borderRadius: '15px', 
           boxShadow: '0 10px 30px rgba(0,0,0,0.1)', textAlign: 'center',
@@ -124,6 +154,9 @@ const SelectionPage = () => {
             </button>
             <button className="primary-btn" style={{background: '#4b5563'}} onClick={() => loadDataset('2026.csv')}>
               Load Auction 2026
+            </button>
+            <button className="primary-btn" onClick={() => loadDataset('players_with_images.csv')}>
+              Load Players With Images
             </button>
           </div>
         </div>
@@ -148,6 +181,9 @@ const SelectionPage = () => {
               }} 
             />
           </div>
+          <p style={{marginTop:'10px', fontSize:'0.8rem', color:'#666'}}>
+             Format: Name, Set, Role, Country, Price, Image
+          </p>
         </div>
       </div>
     </div>
