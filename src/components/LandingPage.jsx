@@ -157,12 +157,13 @@ const LandingPage = () => {
                     className="team-btn"
                     disabled={isTaken} 
                     style={{ 
-                      borderColor: isMine ? '#22c55e' : (isTaken ? '#ccc' : team.color),
-                      background: isMine ? '#22c55e' : (isTaken ? '#eee' : 'white'),
+                      borderColor: isMine ? team.color : (isTaken ? '#ccc' : team.color),
+                      background: isMine ? team.color : (isTaken ? '#eee' : 'white'),
                       color: isMine ? 'white' : (isTaken ? '#999' : '#333'),
                       opacity: isTaken ? 0.6 : 1,
                       transform: isMine ? 'scale(1.05)' : 'scale(1)',
-                      position: 'relative'
+                      position: 'relative',
+                      textShadow: isMine ? '0px 1px 3px rgba(0,0,0,0.5)' : 'none'
                     }}
                     onClick={() => handleTeamClick(team)}
                   >

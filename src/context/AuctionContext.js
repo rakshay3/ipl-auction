@@ -169,6 +169,7 @@ export const AuctionProvider = ({ children }) => {
   const navigateTo = (page) => socket?.emit('NAVIGATE', { roomId, page });
   const canFinishAuction = () => activeTeams.every(team => team.squad && team.squad.length >= config.minPlayers);
   const deleteSet = (setIndex) => socket?.emit('DELETE_SET', { roomId, setIndex });
+  const sendMessage = (message) => socket?.emit('MESSAGE', { roomId, message });
   return (
     <AuctionContext.Provider value={{
       socket, isConnected, roomId, isHost,
@@ -186,7 +187,7 @@ export const AuctionProvider = ({ children }) => {
       voteFinish, endRoom,
       
       sellPlayer, markUnsold, startReveal,
-      resetGame, setCurrentPage: navigateTo, canFinishAuction
+      resetGame, setCurrentPage: navigateTo, canFinishAuction, sendMessage
     }}>
       {children}
     </AuctionContext.Provider>

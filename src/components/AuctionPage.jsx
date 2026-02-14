@@ -8,13 +8,13 @@ const AuctionPage = () => {
     activeTeams, playerSets, unsoldPlayers, config, 
     currentAuctionState, feed, 
     startAutoLoop, placeBid, pauseGame, withdrawBid, requestTime, changeTimer,
-    currentSetIndex, setCurrentPage, canFinishAuction,
+    currentSetIndex, canFinishAuction,
     sellPlayer, markUnsold,
-    voteFinish, finishVotes, connectedUsers, endRoom,
-    deletePlayerFromSet, deleteSet
+    voteFinish, finishVotes, endRoom,
+    deletePlayerFromSet, deleteSet,
+    sendMessage // <--- NEW
   } = useAuction();
 
-  // Destructure State
   const { 
     currentPlayer, currentBid, currentBidder, 
     timer, status, activeBidders = [], isPaused 
@@ -27,17 +27,17 @@ const AuctionPage = () => {
   const [newTimerVal, setNewTimerVal] = useState(45);
   const [rightTab, setRightTab] = useState('teams'); 
   const [expandedTeamId, setExpandedTeamId] = useState(null); 
+  const [expandedSetIndex, setExpandedSetIndex] = useState(currentSetIndex);
   
-  // CHANGED: Default to currentSetIndex so the active set is open by default, but can be closed
-  const [expandedSetIndex, setExpandedSetIndex] = useState(currentSetIndex); 
-  
+  // Chat State
+  const [chatInput, setChatInput] = useState("");
   const feedRef = useRef(null);
 
+  // Auto-scroll chat to bottom
   useEffect(() => {
-    if (feedRef.current) feedRef.current.scrollTop = 0; 
+    if (feedRef.current) feedRef.current.scrollTop = feedRef.current.scrollHeight; 
   }, [feed]);
 
-  // Keep expanded set in sync if set changes automatically
   useEffect(() => {
     setExpandedSetIndex(currentSetIndex);
   }, [currentSetIndex]);
@@ -54,6 +54,13 @@ const AuctionPage = () => {
       let increment = currentBid < 10 ? 0.20 : 0.25;
       nextBid = parseFloat((currentBid + increment).toFixed(2));
   }
+
+  const handleSendChat = (e) => {
+      e.preventDefault();
+      if(!chatInput.trim()) return;
+      sendMessage(chatInput);
+      setChatInput("");
+  };
 
   const getTeamStats = (team) => {
       const bats = team.squad.filter(p => p.type === 'Batsman' || p.type === 'Wicket Keeper').length;
@@ -84,6 +91,8 @@ const AuctionPage = () => {
         </div>
         
         <div style={{display:'flex', gap:'10px', alignItems:'center'}}>
+            
+            {/* VOTE FINISH BUTTON */}
             <button 
                 className="btn-finish" 
                 onClick={voteFinish}
@@ -93,64 +102,179 @@ const AuctionPage = () => {
                     opacity: canFinishAuction() ? 1 : 0.6,
                     cursor: canFinishAuction() ? 'pointer' : 'not-allowed',
                     border: finishVotes.includes(socket?.id) ? '2px solid white' : 'none',
-                    minWidth: '140px'
+                    minWidth: '100px', fontSize:'0.8rem', padding:'10px'
                 }}
             >
-                {finishVotes.includes(socket?.id) ? `✅ Voted (${finishVotes.length}/${connectedUsers.length})` : `🏁 Finish (${finishVotes.length}/${connectedUsers.length})`}
+                {finishVotes.includes(socket?.id) ? `✅ Voted` : `🏁 Finish`}
             </button>
 
+            {/* HOST CONTROLS */}
             {isHost && (
                 <>
-                   <div style={{background:'rgba(255,255,255,0.2)', padding:'5px 10px', borderRadius:'5px', display:'flex', gap:'5px', alignItems:'center'}}>
-                      <span style={{color:'white', fontSize:'0.8rem'}}>Timer:</span>
-                      <input type="number" value={newTimerVal} onChange={(e) => setNewTimerVal(e.target.value)} style={{width:'40px', padding:'5px', borderRadius:'3px', border:'none'}} />
-                      <button onClick={() => changeTimer(newTimerVal)} style={{cursor:'pointer', background:'white', border:'none', borderRadius:'3px', padding:'5px'}}>Set</button>
+                   {/* 1. COMPACT ADMIN ACTIONS (Sell/Unsold) */}
+                   <div style={{display:'flex', flexDirection:'column', gap:'3px'}}>
+                       <button 
+                           onClick={() => sellPlayer(currentPlayer, currentBidder, currentBid)} 
+                           disabled={!currentBidder}
+                           style={{
+                               background: currentBidder ? '#22c55e' : '#9ca3af', 
+                               color:'white', border:'none', padding:'4px 8px', borderRadius:'4px', 
+                               fontSize:'0.7rem', cursor: currentBidder ? 'pointer' : 'not-allowed',
+                               fontWeight:'bold', letterSpacing:'1px'
+                           }}
+                           title="Force Sell to Current Bidder"
+                       >
+                           ⚡ SELL
+                       </button>
+                       <button 
+                           onClick={() => markUnsold(currentPlayer)} 
+                           style={{
+                               background:'#ef4444', color:'white', border:'none', padding:'4px 8px', 
+                               borderRadius:'4px', fontSize:'0.7rem', cursor:'pointer',
+                               fontWeight:'bold', letterSpacing:'1px'
+                           }}
+                           title="Force Mark Unsold"
+                       >
+                           ✕ UNSOLD
+                       </button>
                    </div>
-                   <button className="primary-btn" onClick={pauseGame} style={{background: isPaused ? '#f59e0b' : '#3b82f6', minWidth:'80px'}}>{isPaused ? "RESUME" : "PAUSE"}</button>
-                   <button onClick={() => { if(window.confirm("DANGER: End Room?")) endRoom(); }} style={{background: '#ef4444', color:'white', border:'none', padding:'10px', borderRadius:'5px', cursor:'pointer', fontWeight:'bold'}} title="Force Close Room">⛔ END</button>
+
+                   {/* 2. TIMER SETTING */}
+                   <div style={{background:'rgba(255,255,255,0.2)', padding:'5px', borderRadius:'5px', display:'flex', gap:'5px', alignItems:'center'}}>
+                      <input 
+                        type="number" 
+                        value={newTimerVal} 
+                        onChange={(e) => setNewTimerVal(e.target.value)} 
+                        style={{width:'35px', padding:'2px', borderRadius:'3px', border:'none', textAlign:'center', fontSize:'0.9rem'}} 
+                      />
+                      <button onClick={() => changeTimer(newTimerVal)} style={{cursor:'pointer', background:'white', border:'none', borderRadius:'3px', padding:'2px 6px', fontSize:'0.8rem'}}>Set</button>
+                   </div>
+                   
+                   {/* 3. PAUSE (Icon) */}
+                   <button 
+                      onClick={pauseGame} 
+                      style={{
+                          background: isPaused ? '#f59e0b' : '#3b82f6', 
+                          width:'40px', height:'40px', borderRadius:'50%', 
+                          border:'2px solid white', cursor:'pointer', 
+                          display:'flex', alignItems:'center', justifyContent:'center',
+                          fontSize:'1.2rem', color:'white', boxShadow:'0 2px 5px rgba(0,0,0,0.2)'
+                      }} 
+                      title={isPaused ? "Resume Game" : "Pause Game"}
+                   >
+                      {isPaused ? "▶" : "⏸"}
+                   </button>
+                   
+                   {/* 4. END ROOM (Icon) */}
+                   <button 
+                      onClick={() => { if(window.confirm("DANGER: End Room?")) endRoom(); }} 
+                      style={{
+                          background: '#ef4444', color:'white', border:'2px solid white', 
+                          width:'40px', height:'40px', borderRadius:'50%', 
+                          cursor:'pointer', fontWeight:'bold', fontSize:'1.2rem',
+                          display:'flex', alignItems:'center', justifyContent:'center',
+                          boxShadow:'0 2px 5px rgba(0,0,0,0.2)'
+                      }} 
+                      title="Force Close Room"
+                   >
+                      ⛔
+                   </button>
                 </>
             )}
         </div>
       </div>
 
-      <div className="auction-layout" style={{gridTemplateColumns: '1fr 2fr 1fr', gap:'20px'}}>
+      <div className="auction-layout" style={{gridTemplateColumns: '1.2fr 1.8fr 1fr', gap:'20px'}}>
         
-        {/* LEFT PANEL */}
-        <div className="auction-controls" style={{display:'flex', flexDirection:'column', gap:'20px'}}>
-           <div style={{textAlign:'center', padding:'20px', background:'#f8f9fa', borderRadius:'10px'}}>
-                <h4>{myTeam ? myTeam.abbr : "Observer Mode"}</h4>
-                {myTeam ? (
-                    <>
-                        <p style={{fontSize:'1.2rem', fontWeight:'bold', color:'#2563eb'}}>Budget: {myTeam.budget} Cr</p>
-                        <div style={{display:'flex', flexDirection:'column', gap:'10px'}}>
-                            <button onClick={requestTime} disabled={status !== 'REVEALED' || isPaused} style={{background:'#3b82f6', color:'white', border:'none', padding:'12px', borderRadius:'5px', cursor:'pointer', opacity: status !== 'REVEALED' ? 0.5 : 1}}>⏱ NEED TIME (+30s)</button>
-                            {isInWar && !isMyBid && <button onClick={withdrawBid} style={{background:'#ef4444', color:'white', border:'none', padding:'12px', borderRadius:'5px', cursor:'pointer'}}>🏃 WITHDRAW</button>}
-                        </div>
-                    </>
-                ) : <p style={{color:'#666'}}>You are watching.</p>}
+        {/* --- LEFT PANEL: CHAT & CONTROLS --- */}
+        <div className="auction-controls" style={{display:'flex', flexDirection:'column', height:'600px', background:'#f8f9fa', borderRadius:'10px', overflow:'hidden', boxShadow:'0 4px 6px rgba(0,0,0,0.1)'}}>
+           
+           {/* 1. TOP BAR: Team Identity & Actions */}
+           <div style={{padding:'15px', background:'white', borderBottom:'1px solid #e5e7eb'}}>
+                <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'10px'}}>
+                    <strong style={{fontSize:'1.1rem', color:'#1e3a8a'}}>
+                        {myTeam ? myTeam.abbr : (isHost ? "HOST" : "Spectator")}
+                    </strong>
+                    {myTeam && <span style={{fontSize:'0.8rem', background:'#dbeafe', color:'#1e40af', padding:'2px 8px', borderRadius:'10px'}}>Owner</span>}
+                </div>
+                
+                {/* Action Buttons */}
+                {myTeam && (
+                    <div style={{display:'flex', gap:'5px'}}>
+                         <button 
+                            onClick={requestTime} 
+                            disabled={status !== 'REVEALED' || isPaused} 
+                            style={{flex:1, background:'#3b82f6', color:'white', border:'none', padding:'8px', borderRadius:'5px', cursor:'pointer', fontSize:'0.8rem', opacity: status !== 'REVEALED' ? 0.5 : 1}}
+                         >
+                            ⏱ Need Time
+                         </button>
+                         {isInWar && !isMyBid && (
+                             <button 
+                                onClick={withdrawBid} 
+                                style={{flex:1, background:'#ef4444', color:'white', border:'none', padding:'8px', borderRadius:'5px', cursor:'pointer', fontSize:'0.8rem'}}
+                             >
+                                🏃 Withdraw
+                             </button>
+                         )}
+                    </div>
+                )}
            </div>
 
-           {isHost && (
-               <div style={{padding:'15px', background:'#fee2e2', borderRadius:'10px'}}>
-                   <h5 style={{margin:'0 0 10px 0', color:'#991b1b'}}>⚠️ Admin Override</h5>
-                   <div style={{display:'flex', gap:'5px'}}>
-                       <button onClick={() => sellPlayer(currentPlayer, currentBidder, currentBid)} disabled={!currentBidder} style={{flex:1, cursor:'pointer', padding:'5px'}}>Force Sell</button>
-                       <button onClick={() => markUnsold(currentPlayer)} style={{flex:1, cursor:'pointer', padding:'5px'}}>Force Unsold</button>
-                   </div>
-               </div>
-           )}
-
-           <div style={{background:'rgba(0,0,0,0.4)', borderRadius:'10px', padding:'10px', flex:1, display:'flex', flexDirection:'column'}}>
-              <h4 style={{color:'white', margin:'0 0 10px 0'}}>📢 Live Feed</h4>
-              <div ref={feedRef} style={{flex:1, overflowY:'auto', maxHeight:'300px', display:'flex', flexDirection:'column', gap:'5px'}}>
-                  {feed.map((log, i) => (
-                      <div key={i} style={{background: log.type === 'BID' ? '#dbeafe' : (log.type === 'SUCCESS' ? '#dcfce7' : (log.type === 'ERROR' ? '#fee2e2' : 'white')), padding:'8px', borderRadius:'5px', fontSize:'0.85rem', color:'#333'}}>
-                          <span style={{opacity:0.6, fontSize:'0.7rem', marginRight:'5px'}}>{new Date(log.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})}</span>
-                          {log.msg}
-                      </div>
-                  ))}
-              </div>
+           {/* 2. CHAT AREA (Scrollable) */}
+           <div ref={feedRef} style={{flex:1, overflowY:'auto', padding:'10px', display:'flex', flexDirection:'column', gap:'8px', background:'#f3f4f6'}}>
+              {feed.length === 0 && <div style={{textAlign:'center', color:'#9ca3af', marginTop:'20px', fontSize:'0.9rem'}}>Chat is empty...</div>}
+              
+              {feed.map((item, i) => {
+                  const isChat = item.type === 'CHAT';
+                  const isMe = item.sender === (myTeam ? myTeam.abbr : (isHost ? "HOST" : "Spectator")); // Simple check
+                  
+                  if (!isChat) {
+                      // SYSTEM MESSAGES (Bids, Sales, Errors)
+                      return (
+                          <div key={i} style={{textAlign:'center', margin:'5px 0'}}>
+                              <span style={{
+                                  background: item.type === 'BID' ? '#dbeafe' : (item.type === 'SUCCESS' ? '#dcfce7' : '#fee2e2'), 
+                                  color: item.type === 'BID' ? '#1e40af' : (item.type === 'SUCCESS' ? '#166534' : '#991b1b'),
+                                  padding:'4px 12px', borderRadius:'12px', fontSize:'0.75rem', fontWeight:'bold', display:'inline-block'
+                              }}>
+                                  {item.msg}
+                              </span>
+                          </div>
+                      );
+                  } else {
+                      // USER CHAT BUBBLES
+                      return (
+                          <div key={i} style={{alignSelf: isMe ? 'flex-end' : 'flex-start', maxWidth:'85%'}}>
+                              {!isMe && <div style={{fontSize:'0.7rem', color:'#6b7280', marginLeft:'5px', marginBottom:'2px'}}>{item.sender}</div>}
+                              <div style={{
+                                  background: isMe ? '#2563eb' : 'white',
+                                  color: isMe ? 'white' : '#1f2937',
+                                  padding:'8px 12px', borderRadius:'12px',
+                                  borderBottomRightRadius: isMe ? '2px' : '12px',
+                                  borderBottomLeftRadius: isMe ? '12px' : '2px',
+                                  boxShadow:'0 1px 2px rgba(0,0,0,0.1)', fontSize:'0.9rem'
+                              }}>
+                                  {item.msg}
+                              </div>
+                          </div>
+                      );
+                  }
+              })}
            </div>
+
+           {/* 3. CHAT INPUT */}
+           <form onSubmit={handleSendChat} style={{padding:'10px', background:'white', borderTop:'1px solid #e5e7eb', display:'flex', gap:'5px'}}>
+               <input 
+                  type="text" 
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  placeholder="Type a message..." 
+                  style={{flex:1, padding:'8px 12px', borderRadius:'20px', border:'1px solid #d1d5db', outline:'none'}}
+               />
+               <button type="submit" style={{background:'#2563eb', color:'white', border:'none', borderRadius:'50%', width:'35px', height:'35px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center'}}>
+                  ➤
+               </button>
+           </form>
         </div>
 
         {/* CENTER PANEL */}
@@ -274,10 +398,10 @@ const AuctionPage = () => {
                  </div>
              )}
 
-             {/* 2. SET VIEW (UPDATED) */}
+             {/* 2. SET VIEW */}
              {rightTab === 'set' && (
                  <div>
-                     {/* Current Set - Now Collapsible */}
+                     {/* Current Set */}
                      <div style={{marginBottom:'5px', background:'white', borderRadius:'8px', overflow:'hidden', border:'2px solid #2563eb'}}>
                          <div 
                              onClick={() => toggleSetView(currentSetIndex)}
@@ -302,9 +426,9 @@ const AuctionPage = () => {
                          )}
                      </div>
 
-                     {/* Upcoming Sets - Accordion */}
+                     {/* Upcoming Sets */}
                      {playerSets.map((s, idx) => {
-                         if(idx <= currentSetIndex) return null; // Skip current/past
+                         if(idx <= currentSetIndex) return null; 
                          const isExpanded = expandedSetIndex === idx;
                          return (
                              <div key={idx} style={{marginBottom:'5px', background:'white', borderRadius:'8px', overflow:'hidden', border:'1px solid #eee'}}>
@@ -368,4 +492,4 @@ const AuctionPage = () => {
   );
 };
 
-export default AuctionPage; 
+export default AuctionPage;

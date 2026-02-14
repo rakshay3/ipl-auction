@@ -1,7 +1,7 @@
 NAME,SET NAME,ROLE,COUNTRY,PRICE,IMAGE
-Andre Russell,Marquee Tier 1,All-rounder,West Indies,1C,
-David Warner,Marquee Tier 1,Batsman,Australia,2C,
-Glenn Maxwell,Marquee Tier 1,All-rounder,Australia,2C,
+Andre Russell,Marquee Tier 1,All-rounder,West Indies,1C, andre_russell.avif
+David Warner,Marquee Tier 1,Batsman,Australia,2C, david_warner.avif
+Glenn Maxwell,Marquee Tier 1,All-rounder,Australia,2C, glenn_maxwell.avif
 Jasprit Bumrah,Marquee Tier 1,Bowler,India,2C,bumrah.avif
 Jos Buttler,Marquee Tier 1,Wicket-Keeper,England,2C,jos_buttler.avif
 MS Dhoni,Marquee Tier 1,Wicket-Keeper,India,3 Cr,ms_dhoni.avif
@@ -13,112 +13,112 @@ Travis Head,Marquee Tier 1,Batsman,Australia,2 Cr,travis_head.avif
 Virat Kohli,Marquee Tier 1,Batsman,India,3 Cr,virat_kohli.avif
 Jofra Archer,Marquee Tier 2,Bowler,England,2 Cr,jofra_archer.avif
 Aiden Markram,Marquee Tier 2,Batsman,South Africa,2 Cr,markram.avif
-Anrich Nortje,Marquee Tier 2,Bowler,South Africa,2 Cr,
+Anrich Nortje,Marquee Tier 2,Bowler,South Africa,2 Cr, anrich_nortje.avif
 Axar Patel,Marquee Tier 2,All-rounder,India,2 Cr,axar_patel.avif
-Cameron Green,Marquee Tier 2,All-rounder,Australia,2 Cr,
-David Miller,Marquee Tier 2,Batsman,South Africa,2 Cr,
-Devon Conway,Marquee Tier 2,Wicket-Keeper,New Zealand,2 Cr,
+Cameron Green,Marquee Tier 2,All-rounder,Australia,2 Cr, cameron_green.jpg
+David Miller,Marquee Tier 2,Batsman,South Africa,2 Cr, david_miller.jpg
+Devon Conway,Marquee Tier 2,Wicket-Keeper,New Zealand,2 Cr, devon_conway.avif
 Hardik Pandya,Marquee Tier 2,All-rounder,India,2 Cr,hardik_pandya.avif
-Harry Brook,Marquee Tier 2,Batsman,England,2 Cr,
+Harry Brook,Marquee Tier 2,Batsman,England,2 Cr, harry_brook.jpg
 Heinrich Klaasen,Marquee Tier 2,Wicket-Keeper,South Africa,2 Cr,heinrich_klaasen.avif
 Ishan Kishan,Marquee Tier 2,Wicket-Keeper,India,2 Cr,ishan_kishan.avif
-Jonny Bairstow,Marquee Tier 2,Wicket-Keeper,England,2 Cr,
+Jonny Bairstow,Marquee Tier 2,Wicket-Keeper,England,2 Cr, jonny_bairstow.avif
 Josh Hazlewood,Marquee Tier 2,Bowler,Australia,2 Cr,hazelwood.avif
 KL Rahul,Marquee Tier 2,Wicket-Keeper,India,2 Cr,kl_rahul.avif
 Kagiso Rabada,Marquee Tier 2,Bowler,South Africa,2 Cr,rabada.avif
-Liam Livingstone,Marquee Tier 2,All-rounder,England,2 Cr,
+Liam Livingstone,Marquee Tier 2,All-rounder,England,2 Cr, liam_livingstone.avif
 Marcus Stoinis,Marquee Tier 2,All-rounder,Australia,2 Cr,stoinis.avif
 Mitchell Marsh,Marquee Tier 2,All-rounder,Australia,2 Cr,mitchell_marsh.avif
 Mitchell Starc,Marquee Tier 2,Bowler,Australia,2 Cr,mitchell_starc.avif
-Mohammed Shami,Marquee Tier 2,Bowler,India,2 Cr,
+Mohammed Shami,Marquee Tier 2,Bowler,India,2 Cr, mohammed_shami.avif
 Mohammed Siraj,Marquee Tier 2,Bowler,India,2 Cr,siraj.avif
 Nicholas Pooran,Marquee Tier 2,Batsman,West Indies,2 Cr,pooran.avif
 Phil Salt,Marquee Tier 2,Wicket-Keeper,England,2 Cr,phil_salt.avif
-Quinton de Kock,Marquee Tier 2,Wicket-Keeper,South Africa,2 Cr,
-Rachin Ravindra,Marquee Tier 2,All-rounder,New Zealand,2 Cr,
-Ravichandran Ashwin,Marquee Tier 2,Batsman,India,2 Cr,
-Ravindra Jadeja,Marquee Tier 2,All-rounder,India,2 Cr,
+Quinton de Kock,Marquee Tier 2,Wicket-Keeper,South Africa,2 Cr, qdk.avif
+Rachin Ravindra,Marquee Tier 2,All-rounder,New Zealand,2 Cr, rachin_ravindra.avif
+Ravichandran Ashwin,Marquee Tier 2,Batsman,India,2 Cr, ravichandran_ashwin.avif
+Ravindra Jadeja,Marquee Tier 2,All-rounder,India,2 Cr, ravindra_jadeja.avif
 Rishabh Pant,Marquee Tier 2,Wicket-Keeper,India,2 Cr,pant.avif
-Sam Curran,Marquee Tier 2,All-rounder,England,2 Cr,
-Sanju Samson,Marquee Tier 2,Wicket-Keeper,India,2 Cr,
+Sam Curran,Marquee Tier 2,All-rounder,England,2 Cr, sam_curran.avif
+Sanju Samson,Marquee Tier 2,Wicket-Keeper,India,2 Cr, sanju_samson.avif
 Shreyas Iyer,Marquee Tier 2,Batsman,India,2 Cr,shreyas_iyer.avif
 Shubman Gill,Marquee Tier 2,Batsman,India,2 Cr,shubman_gill.avif
 Suryakumar Yadav,Marquee Tier 2,Batsman,India,2 Cr,sky.avif
 Trent Boult,Marquee Tier 2,Bowler,New Zealand,2 Cr,trent_boult.avif
-Wanindu Hasaranga,Marquee Tier 2,All-rounder,Sri Lanka,2 Cr,
+Wanindu Hasaranga,Marquee Tier 2,All-rounder,Sri Lanka,2 Cr, wanindu.avif
 Yashasvi Jaiswal,Marquee Tier 2,Batsman,India,2 Cr,jaiswal.avif
 Yuzvendra Chahal,Marquee Tier 2,Bowler,India,2 Cr,yuzi.avif
-Abhimanyu Easwaran,Capped Batsman,All-rounder,India,1.5 Cr,
+Abhimanyu Easwaran,Capped Batsman,All-rounder,India,1.5 Cr, Abhimanyu_Easwaran.avif
 Abhishek Sharma,Capped Batsman,Batsman,India,1.5 Cr,abhisek_sharma.avif
 Abishek Porel,Capped Batsman,Wicket-Keeper,India,1.5 Cr,abhisek_porel.avif
 Ajinkya Rahane,Capped Batsman,Batsman,India,1.5 Cr,rahane.avif
-Alex Carey,Capped Batsman,Wicket-Keeper,Australia,1.5 Cr,
-Andre Fletcher,Capped Batsman,Batsman,West Indies,1.5 Cr,
-Anmolpreet Singh,Capped Batsman,Batsman,India,1.5 Cr,
-Ashton Turner,Capped Batsman,Batsman,Australia,1.5 Cr,
-Ben Duckett,Capped Batsman,Batsman,England,1.5 Cr,
-Ben McDermott,Capped Batsman,Wicket-Keeper,Australia,1.5 Cr,
-Bhanuka Rajapaksa,Capped Batsman,Batsman,Sri Lanka,1.5 Cr,
-Brandon King,Capped Batsman,Batsman,West Indies,1.5 Cr,
-Charith Asalanka,Capped Batsman,All-rounder,Sri Lanka,1.5 Cr,
-Daryl Mitchell,Capped Batsman,Batsman,New Zealand,1.5 Cr,
+Alex Carey,Capped Batsman,Wicket-Keeper,Australia,1.5 Cr, alex_carey.avif
+Andre Fletcher,Capped Batsman,Batsman,West Indies,1.5 Cr, andre_fletcher.jpg
+Anmolpreet Singh,Capped Batsman,Batsman,India,1.5 Cr, Anmolpreet_Singh.avif
+Ashton Turner,Capped Batsman,Batsman,Australia,1.5 Cr, ashton_turner.avif
+Ben Duckett,Capped Batsman,Batsman,England,1.5 Cr, duckett.avif
+Ben McDermott,Capped Batsman,Wicket-Keeper,Australia,1.5 Cr, ben_mcdermott.png
+Bhanuka Rajapaksa,Capped Batsman,Batsman,Sri Lanka,1.5 Cr, bhanuka_rajapaksa.avif
+Brandon King,Capped Batsman,Batsman,West Indies,1.5 Cr, brandon_king.jpg
+Charith Asalanka,Capped Batsman,All-rounder,Sri Lanka,1.5 Cr, charith_asalanka.avif
+Daryl Mitchell,Capped Batsman,Batsman,New Zealand,1.5 Cr, daryl_mitchell.avif
 Devdutt Padikkal,Capped Batsman,Batsman,India,1.5 Cr,devdutt_padikkal.avif
 Dewald Brevis,Capped Batsman,Batsman,South Africa,1.5 Cr,dewald_brevis.avif
 Dhruv Jurel,Capped Batsman,Wicket-Keeper,India,1.5 Cr,dhurv_jurel.avif
-Evin Lewis,Capped Batsman,Batsman,West Indies,1.5 Cr,
-Faf du Plessis,Capped Batsman,Batsman,South Africa,1.5 Cr,
-Finn Allen,Capped Batsman,Batsman,New Zealand,1.5 Cr,
+Evin Lewis,Capped Batsman,Batsman,West Indies,1.5 Cr, Evin_Lewis.png
+Faf du Plessis,Capped Batsman,Batsman,South Africa,1.5 Cr, faf.avif
+Finn Allen,Capped Batsman,Batsman,New Zealand,1.5 Cr, finn_allen.avif
 Glenn Phillips,Capped Batsman,Batsman,New Zealand,1.5 Cr, glenn_phillips.avif
-Ibrahim Zadran,Capped Batsman,Batsman,Afghanistan,1.5 Cr,
-Jake Fraser-McGurk,Capped Batsman,Batsman,Australia,1.5 Cr,
-James Vince,Capped Batsman,Batsman,England,1.5 Cr,
+Ibrahim Zadran,Capped Batsman,Batsman,Afghanistan,1.5 Cr, zadran.avif
+Jake Fraser-McGurk,Capped Batsman,Batsman,Australia,1.5 Cr, jfk.avif
+James Vince,Capped Batsman,Batsman,England,1.5 Cr, vince.png
 Jitesh Sharma,Capped Batsman,Wicket-Keeper,India,1.5 Cr,jitesh_sharma.avif
-Jordan Cox,Capped Batsman,Wicket-Keeper,England,1.5 Cr,
-Josh Inglis,Capped Batsman,Wicket-Keeper,Australia,1.5 Cr,
-Josh Philippe,Capped Batsman,Wicket-Keeper,Australia,1.5 Cr,
-Kane Williamson,Capped Batsman,Batsman,New Zealand,1.5 Cr,
+Jordan Cox,Capped Batsman,Wicket-Keeper,England,1.5 Cr, Jordan_Cox.jpg
+Josh Inglis,Capped Batsman,Wicket-Keeper,Australia,1.5 Cr, josh_inglis.avif
+Josh Philippe,Capped Batsman,Wicket-Keeper,Australia,1.5 Cr, josh_philippe.avif
+Kane Williamson,Capped Batsman,Batsman,New Zealand,1.5 Cr, kane_williamson.avif
 Karun Nair,Capped Batsman,Batsman,India,1.5 Cr,karun_nair.avif
-Kusal Mendis,Capped Batsman,Wicket-Keeper,Sri Lanka,1.5 Cr,
-Kusal Perera,Capped Batsman,Wicket-Keeper,Sri Lanka,1.5 Cr,
-Kyle Verreynne,Capped Batsman,Wicket-Keeper,South Africa,1.5 Cr,
+Kusal Mendis,Capped Batsman,Wicket-Keeper,Sri Lanka,1.5 Cr, kusal_mendis.avif
+Kusal Perera,Capped Batsman,Wicket-Keeper,Sri Lanka,1.5 Cr, kusal_perera.avif
+Kyle Verreynne,Capped Batsman,Wicket-Keeper,South Africa,1.5 Cr, kyle_verreynne.png
 Litton Das,Capped Batsman,Wicket-Keeper,Bangladesh,1.5 Cr,
 Shahrukh Khan,Capped Batsman,Batsman,India,1.5 Cr,shahrukh_khan.avif
-Manan Vohra,Capped Batsman,Batsman,India,1.5 Cr,
+Manan Vohra,Capped Batsman,Batsman,India,1.5 Cr, manan_vohra.avif
 Manish Pandey,Capped Batsman,Batsman,India,1.5 Cr,manish_pandey.avif
 Marco Jansen,Capped Batsman,Bowler,South Africa,1.5 Cr,marco_jansen.avif
-Mark Chapman,Capped Batsman,Batsman,New Zealand,1.5 Cr,
+Mark Chapman,Capped Batsman,Batsman,New Zealand,1.5 Cr, mark_chapman.png
 Matthew Breetzke,Capped Batsman,Batsman,South Africa,1.5 Cr, matthew_breetzke.avif
-Mayank Agarawal,Capped Batsman,Batsman,India,1.5 Cr,
+Mayank Agarawal,Capped Batsman,Batsman,India,1.5 Cr, mayank_agarwal.png
 Najibullah Zadran,Capped Batsman,Batsman,Afghanistan,1.5 Cr,
-Nitish Rana,Capped Batsman,Batsman,India,1.5 Cr,
-Ollie Pope,Capped Batsman,Batsman,England,1.5 Cr,
-Pathum Nissanka,Capped Batsman,Batsman,Sri Lanka,1.5 Cr,
+Nitish Rana,Capped Batsman,Batsman,India,1.5 Cr, nitish_rana.avif
+Ollie Pope,Capped Batsman,Batsman,England,1.5 Cr, ollie_pope.png
+Pathum Nissanka,Capped Batsman,Batsman,Sri Lanka,1.5 Cr, Pathum_Nissanka.avif
 Prabhsimran Singh,Capped Batsman,Batsman,India,1.5 Cr, prabhsimran_singh.avif
 Prithvi Shaw,Capped Batsman,Batsman,India,1.5 Cr, prithivi_shaw.avif
-Rahmanullah Gurbaz,Capped Batsman,Wicket-Keeper,Afghanistan,1.5 Cr,
-Rahul Tripathi,Capped Batsman,Batsman,India,1.5 Cr,
+Rahmanullah Gurbaz,Capped Batsman,Wicket-Keeper,Afghanistan,1.5 Cr, gurbaz.avif
+Rahul Tripathi,Capped Batsman,Batsman,India,1.5 Cr, rahul_tripathi.avif
 Rajat Patidar,Capped Batsman,Batsman,India,1.5 Cr, rajat_patidar.avif
-Rassie van der Dussen,Capped Batsman,Batsman,South Africa,1.5 Cr,
-Ricky Bhui,Capped Batsman,Batsman,India,1.5 Cr,
-Rilee Rossouw,Capped Batsman,Batsman,South Africa,1.5 Cr,
+Rassie van der Dussen,Capped Batsman,Batsman,South Africa,1.5 Cr, rvd.png
+Ricky Bhui,Capped Batsman,Batsman,India,1.5 Cr, ricky_bhui.avif
+Rilee Rossouw,Capped Batsman,Batsman,South Africa,1.5 Cr, Rilee_Rossouw.avif
 Rinku Singh,Capped Batsman,Batsman,India,1.5 Cr,rinku_singh.avif
 Rovman Powell,Capped Batsman,Batsman,West Indies,1.5 Cr,rovman_powell.avif
 Ruturaj Gaikwad,Capped Batsman,Batsman,India,1.5 Cr, Ruturaj_Gaikwad.avif
 Ryan Rickelton,Capped Batsman,Wicket-Keeper,South Africa,1.5 Cr, ryan_rickelton.avif
 Sai Sudharsan,Capped Batsman,Batsman,India,1.5 Cr, sai_sudharsan.avif
-Sam Billings,Capped Batsman,Wicket-Keeper,England,1.5 Cr,
-Sarfaraz Khan,Capped Batsman,Batsman,India,1.5 Cr,
-Sediqullah Atal,Capped Batsman,Batsman,Afghanistan,1.5 Cr,
-Shai Hope,Capped Batsman,Wicket-Keeper,West Indies,1.5 Cr,
-Sherfane Rutherford,Capped Batsman,Batsman,West Indies,1.5 Cr,
+Sam Billings,Capped Batsman,Wicket-Keeper,England,1.5 Cr, Sam_Billings.jpg
+Sarfaraz Khan,Capped Batsman,Batsman,India,1.5 Cr, Sarfaraz_Khan.avif
+Sediqullah Atal,Capped Batsman,Batsman,Afghanistan,1.5 Cr,Sediqullah_Atal.avif
+Shai Hope,Capped Batsman,Wicket-Keeper,West Indies,1.5 Cr, Shai_Hope.avif
+Sherfane Rutherford,Capped Batsman,Batsman,West Indies,1.5 Cr, SherfaneRutherford.avif
 Shimron Hetmyer,Capped Batsman,Batsman,India,1.5 Cr, shimron_hetmyer.avif
-Steven Smith,Capped Batsman,Batsman,Australia,1.5 Cr,
+Steven Smith,Capped Batsman,Batsman,Australia,1.5 Cr, Steven_Smith.avif
 Tilak Varma,Capped Batsman,Batsman,India,1.5 Cr, tilak_varma.avif
-Tim Seifert,Capped Batsman,Wicket-Keeper,New Zealand,1.5 Cr,
-Tom Banton,Capped Batsman,Wicket-Keeper,England,1.5 Cr,
-Tom Kohler-Cadmore,Capped Batsman,Batsman,India,1.5 Cr,
-Tom Latham,Capped Batsman,Wicket-Keeper,New Zealand,1.5 Cr,
-Towhid Hridoy,Capped Batsman,Batsman,Bangladesh,1.5 Cr,
+Tim Seifert,Capped Batsman,Wicket-Keeper,New Zealand,1.5 Cr, Tim_Seifert.png
+Tom Banton,Capped Batsman,Wicket-Keeper,England,1.5 Cr, Tom_Banton.avif
+Tom Kohler-Cadmore,Capped Batsman,Batsman,India,1.5 Cr, Tom_Kohler-Cadmore.avif
+Tom Latham,Capped Batsman,Wicket-Keeper,New Zealand,1.5 Cr, Tom_Latham.png
+Towhid Hridoy,Capped Batsman,Batsman,Bangladesh,1.5 Cr, Towhid_Hridoy.avif
 Tristan Stubbs,Capped Batsman,Batsman,South Africa,1.5 Cr, Tristan_Stubbs.avif
 Unmukt Chand,Capped Batsman,Batsman,India,1.5 Cr,
 Will Young,Capped Batsman,Batsman,New Zealand,1.5 Cr,
