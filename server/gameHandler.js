@@ -42,7 +42,7 @@ const INITIAL_STATE = {
     currentBid: 0,
     currentBidder: null, 
     activeBidders: [],   
-    timer: 30,
+    timer: 10,
     auctionStatus: 'IDLE', 
     isPaused: false,
     finishVotes: [] 

@@ -298,7 +298,7 @@ const AuctionPage = () => {
                      <div className="fade-in" style={{textAlign:'center', marginTop:'50px'}}>
                          <h1 style={{fontSize:'5rem', color: currentBidder ? '#22c55e' : '#ef4444', margin:0, textShadow:'0 5px 15px rgba(0,0,0,0.3)'}}>{currentBidder ? "SOLD" : "UNSOLD"}</h1>
                          {currentBidder && <h3 style={{color:'white', fontSize:'2rem'}}>to {currentBidder} for {currentBid} Cr</h3>}
-                         <p style={{color:'#ccc'}}>Next player in 5s...</p>
+                         <p style={{color:'#ccc'}}>Next player in 2s...</p>
                      </div>
                  ) : (
                      <>
