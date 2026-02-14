@@ -1,420 +1,492 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuction } from '../context/AuctionContext';
 import { DEFAULT_AVATAR } from '../data/initialPlayers';
 
 const AuctionPage = () => {
   const { 
-    playerSets, activeTeams, config, sellPlayer, markUnsold, 
-    setCurrentPage, unsoldPlayers, startUnsoldRound, canFinishAuction,
-    currentSetIndex, setCurrentSetIndex, resetGame, deletePlayerFromSet, deleteSet 
+    isHost, socket,
+    activeTeams, playerSets, unsoldPlayers, config, 
+    currentAuctionState, feed, 
+    startAutoLoop, placeBid, pauseGame, withdrawBid, requestTime, changeTimer,
+    currentSetIndex, canFinishAuction,
+    sellPlayer, markUnsold,
+    voteFinish, finishVotes, endRoom,
+    deletePlayerFromSet, deleteSet,
+    sendMessage // <--- NEW
   } = useAuction();
 
-  // STATES
-  const [auctionState, setAuctionState] = useState('idle'); // idle, animating, revealed
-  const [currentPlayer, setCurrentPlayer] = useState(null);
-  
-  // Form State
-  const [activeTab, setActiveTab] = useState('standings'); 
-  const [winningTeam, setWinningTeam] = useState("");
-  const [soldPrice, setSoldPrice] = useState("");
-
-  // UI State for Accordions
-  const [expandedSetId, setExpandedSetId] = useState(null);
-  const [expandedTeamName, setExpandedTeamName] = useState(null); // <--- NEW STATE FOR TEAM ACCORDION
+  const { 
+    currentPlayer, currentBid, currentBidder, 
+    timer, status, activeBidders = [], isPaused 
+  } = currentAuctionState;
 
   const currentSet = playerSets && playerSets[currentSetIndex] ? playerSets[currentSetIndex] : null;
+  const myTeam = activeTeams.find(t => t.ownerId === socket?.id);
+  
+  // Local State
+  const [newTimerVal, setNewTimerVal] = useState(45);
+  const [rightTab, setRightTab] = useState('teams'); 
+  const [expandedTeamId, setExpandedTeamId] = useState(null); 
+  const [expandedSetIndex, setExpandedSetIndex] = useState(currentSetIndex);
+  
+  // Chat State
+  const [chatInput, setChatInput] = useState("");
+  const feedRef = useRef(null);
 
-  // Reset when set changes
+  // Auto-scroll chat to bottom
   useEffect(() => {
-    setAuctionState('idle');
-    setCurrentPlayer(null);
-    setExpandedSetId(null);
-    // We do NOT reset expandedTeamName here so you can keep a team open while changing sets if needed
+    if (feedRef.current) feedRef.current.scrollTop = feedRef.current.scrollHeight; 
+  }, [feed]);
+
+  useEffect(() => {
+    setExpandedSetIndex(currentSetIndex);
   }, [currentSetIndex]);
 
-  // --- ACTIONS ---
+  // --- LOGIC ---
+  const isMyBid = currentBidder === myTeam?.name;
+  const isInWar = activeBidders && activeBidders.includes(myTeam?.name);
+  const isLockedOut = activeBidders.length >= 2 && !isInWar;
 
-  const startReveal = () => {
-    if (!currentSet || currentSet.players.length === 0) return alert("Set Empty");
-    setAuctionState('animating');
-    const randomIndex = Math.floor(Math.random() * currentSet.players.length);
-    const selectedPlayer = currentSet.players[randomIndex];
-
-    setTimeout(() => {
-      setCurrentPlayer(selectedPlayer);
-      setAuctionState('revealed');
-      setWinningTeam(""); 
-      setSoldPrice("");
-    }, 2000);
-  };
-
-  const handleSold = () => {
-    if (!winningTeam || !soldPrice) return alert("Enter details");
-    const team = activeTeams.find(t => t.name === winningTeam);
-    const price = parseFloat(soldPrice);
-
-    if (price > team.budget) return alert(`Budget insufficient! Only ${team.budget}Cr left.`);
-    if (team.squad.length >= config.maxPlayers) return alert("Squad Full!");
-    if (currentPlayer.isForeign && team.foreignCount >= config.maxForeign) return alert("Foreign limit reached!");
-
-    sellPlayer(currentPlayer, winningTeam, price);
-    setAuctionState('idle'); setCurrentPlayer(null);
-  };
-
-  const handleUnsold = () => {
-    markUnsold(currentPlayer);
-    setAuctionState('idle'); setCurrentPlayer(null);
-  };
-
-  const handleQuit = () => { if (window.confirm("Quit Auction?")) resetGame(); };
-
-  const finishAuction = () => {
-      if(canFinishAuction() || window.confirm("Criteria not fully met. Finish anyway?")) {
-          setCurrentPage('summary');
-      }
-  };
-
-  const nextSet = () => {
-    if (currentSetIndex < playerSets.length - 1) {
-        setCurrentSetIndex(prev => prev + 1);
-    } else {
-       if(unsoldPlayers.length > 0) {
-          if(window.confirm("Sets Finished. Start Unsold Round?")) {
-              if(startUnsoldRound()) setCurrentSetIndex(0);
-          } else {
-              finishAuction();
-          }
-       } else {
-          finishAuction();
-       }
-    }
-  };
-
-  // Toggle Helpers
-  const toggleSet = (idx) => {
-    if (expandedSetId === idx) setExpandedSetId(null);
-    else setExpandedSetId(idx);
-  };
-
-  const toggleTeam = (teamName) => {
-    if (expandedTeamName === teamName) setExpandedTeamName(null);
-    else setExpandedTeamName(teamName);
-  };
-
-  // Safety Check
-  if (!currentSet) {
-      return (
-        <div className="container" style={{textAlign:'center', paddingTop:'50px', color: 'white'}}>
-           <h1>⚠️ Auction Paused</h1>
-           <p>We lost track of the current set.</p>
-           <div style={{display:'flex', gap:'20px', justifyContent:'center', marginTop:'20px'}}>
-             <button className="primary-btn" onClick={() => setCurrentPage('summary')}>Go to Summary</button>
-             <button className="primary-btn" style={{background:'#e94560'}} onClick={resetGame}>Reset Game</button>
-           </div>
-        </div>
-      );
+  let nextBid;
+  if (currentBid === 0) {
+      nextBid = currentPlayer ? parseFloat(currentPlayer.basePrice) : 0;
+  } else {
+      let increment = currentBid < 10 ? 0.20 : 0.25;
+      nextBid = parseFloat((currentBid + increment).toFixed(2));
   }
+
+  const handleSendChat = (e) => {
+      e.preventDefault();
+      if(!chatInput.trim()) return;
+      sendMessage(chatInput);
+      setChatInput("");
+  };
+
+  const getTeamStats = (team) => {
+      const bats = team.squad.filter(p => p.type === 'Batsman' || p.type === 'Wicket Keeper').length;
+      const bowls = team.squad.filter(p => p.type === 'Bowler' || p.type === 'All-Rounder').length;
+      const percentUsed = ((config.budget - team.budget) / config.budget) * 100;
+      return { bats, bowls, percentUsed };
+  };
+
+  const toggleTeamView = (teamId) => {
+      if (expandedTeamId === teamId) setExpandedTeamId(null);
+      else setExpandedTeamId(teamId);
+  };
+
+  const toggleSetView = (idx) => {
+      if (expandedSetIndex === idx) setExpandedSetIndex(null);
+      else setExpandedSetIndex(idx);
+  };
+
+  if (!currentSet) return <div className="container" style={{color:'white', textAlign:'center', marginTop:'50px'}}><h2>Loading Set...</h2></div>;
 
   return (
     <div className="container">
-      {/* HEADER WITH ACTIONS */}
-      <div className="header" style={{display:'flex', justifyContent:'space-between', alignItems:'end', marginBottom:'20px'}}>
-        <div style={{textAlign:'left'}}>
+      {/* HEADER */}
+      <div className="header" style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'20px'}}>
+        <div>
           <h1 style={{margin:0, color:'white'}}>🔨 Live Auction</h1>
-          <p style={{margin:0, opacity:0.7, color:'white'}}>Set: {currentSet?.setName || "Finished"}</p>
+          <p style={{margin:0, opacity:0.7, color:'white'}}>Set: {currentSet.setName} ({currentSet.players.length} remaining)</p>
         </div>
-
-        <div style={{display:'flex', gap:'10px'}}>
-          {/* FINISH BUTTON - Only visible when criteria met */}
-          {canFinishAuction() && (
+        
+        <div style={{display:'flex', gap:'10px', alignItems:'center'}}>
+            
+            {/* VOTE FINISH BUTTON */}
             <button 
-              className="primary-btn"
-              onClick={() => {
-                if(window.confirm("Are you sure you want to finish the auction now?")) {
-                  setCurrentPage('summary');
-                }
-              }}
-              style={{
-                background: '#10b981', // Green color
-                color: 'white', 
-                border: 'none', 
-                padding: '8px 15px', 
-                borderRadius: '5px', 
-                cursor: 'pointer', 
-                fontSize: '0.9rem', 
-                fontWeight: 'bold',
-                whiteSpace: 'nowrap',
-                animation: 'fadeIn 0.5s'
-              }}
+                className="btn-finish" 
+                onClick={voteFinish}
+                disabled={!canFinishAuction()}
+                style={{
+                    background: finishVotes.includes(socket?.id) ? '#22c55e' : (canFinishAuction() ? '#2563eb' : '#9ca3af'),
+                    opacity: canFinishAuction() ? 1 : 0.6,
+                    cursor: canFinishAuction() ? 'pointer' : 'not-allowed',
+                    border: finishVotes.includes(socket?.id) ? '2px solid white' : 'none',
+                    minWidth: '100px', fontSize:'0.8rem', padding:'10px'
+                }}
             >
-              🏁 Finish Auction
+                {finishVotes.includes(socket?.id) ? `✅ Voted` : `🏁 Finish`}
             </button>
-          )}
 
-          {/* QUIT BUTTON */}
-          <button 
-            onClick={handleQuit}
-            style={{background:'#fee2e2', color:'#991b1b', border:'none', padding:'8px 15px', borderRadius:'5px', cursor:'pointer', fontSize:'0.9rem', fontWeight:'bold', animation: 'fadeIn 0.5s',whiteSpace: 'nowrap'}}
-          >
-            ✖ Quit Game
-          </button>
+            {/* HOST CONTROLS */}
+            {isHost && (
+                <>
+                   {/* 1. COMPACT ADMIN ACTIONS (Sell/Unsold) */}
+                   <div style={{display:'flex', flexDirection:'column', gap:'3px'}}>
+                       <button 
+                           onClick={() => sellPlayer(currentPlayer, currentBidder, currentBid)} 
+                           disabled={!currentBidder}
+                           style={{
+                               background: currentBidder ? '#22c55e' : '#9ca3af', 
+                               color:'white', border:'none', padding:'4px 8px', borderRadius:'4px', 
+                               fontSize:'0.7rem', cursor: currentBidder ? 'pointer' : 'not-allowed',
+                               fontWeight:'bold', letterSpacing:'1px'
+                           }}
+                           title="Force Sell to Current Bidder"
+                       >
+                           ⚡ SELL
+                       </button>
+                       <button 
+                           onClick={() => markUnsold(currentPlayer)} 
+                           style={{
+                               background:'#ef4444', color:'white', border:'none', padding:'4px 8px', 
+                               borderRadius:'4px', fontSize:'0.7rem', cursor:'pointer',
+                               fontWeight:'bold', letterSpacing:'1px'
+                           }}
+                           title="Force Mark Unsold"
+                       >
+                           ✕ UNSOLD
+                       </button>
+                   </div>
+
+                   {/* 2. TIMER SETTING */}
+                   <div style={{background:'rgba(255,255,255,0.2)', padding:'5px', borderRadius:'5px', display:'flex', gap:'5px', alignItems:'center'}}>
+                      <input 
+                        type="number" 
+                        value={newTimerVal} 
+                        onChange={(e) => setNewTimerVal(e.target.value)} 
+                        style={{width:'35px', padding:'2px', borderRadius:'3px', border:'none', textAlign:'center', fontSize:'0.9rem'}} 
+                      />
+                      <button onClick={() => changeTimer(newTimerVal)} style={{cursor:'pointer', background:'white', border:'none', borderRadius:'3px', padding:'2px 6px', fontSize:'0.8rem'}}>Set</button>
+                   </div>
+                   
+                   {/* 3. PAUSE (Icon) */}
+                   <button 
+                      onClick={pauseGame} 
+                      style={{
+                          background: isPaused ? '#f59e0b' : '#3b82f6', 
+                          width:'40px', height:'40px', borderRadius:'50%', 
+                          border:'2px solid white', cursor:'pointer', 
+                          display:'flex', alignItems:'center', justifyContent:'center',
+                          fontSize:'1.2rem', color:'white', boxShadow:'0 2px 5px rgba(0,0,0,0.2)'
+                      }} 
+                      title={isPaused ? "Resume Game" : "Pause Game"}
+                   >
+                      {isPaused ? "▶" : "⏸"}
+                   </button>
+                   
+                   {/* 4. END ROOM (Icon) */}
+                   <button 
+                      onClick={() => { if(window.confirm("DANGER: End Room?")) endRoom(); }} 
+                      style={{
+                          background: '#ef4444', color:'white', border:'2px solid white', 
+                          width:'40px', height:'40px', borderRadius:'50%', 
+                          cursor:'pointer', fontWeight:'bold', fontSize:'1.2rem',
+                          display:'flex', alignItems:'center', justifyContent:'center',
+                          boxShadow:'0 2px 5px rgba(0,0,0,0.2)'
+                      }} 
+                      title="Force Close Room"
+                   >
+                      ⛔
+                   </button>
+                </>
+            )}
         </div>
       </div>
 
-      <div className="auction-layout" style={{gridTemplateColumns: '1fr 2fr 1fr'}}>
+      <div className="auction-layout" style={{gridTemplateColumns: '1.2fr 1.8fr 1fr', gap:'20px'}}>
         
-        {/* LEFT: CONTROLS */}
-        <div className="auction-controls">
-          <h3>Bidding Desk</h3>
-          <div className="control-row">
-            <select value={winningTeam} onChange={e => setWinningTeam(e.target.value)} disabled={auctionState !== 'revealed'}>
-              <option value="">-- Choose Team --</option>
-              {activeTeams.map(t => <option key={t.name} value={t.name}>{t.name} ({t.budget}Cr)</option>)}
-            </select>
-          </div>
-          <div className="control-row">
-             <input type="number" placeholder="Price (Cr)" value={soldPrice} onChange={e => setSoldPrice(e.target.value)} disabled={auctionState !== 'revealed'} />
-          </div>
-          <div className="action-btns">
-            <button className="btn-sold" onClick={handleSold} disabled={auctionState !== 'revealed'}>SOLD</button>
-            <button className="btn-unsold" onClick={handleUnsold} disabled={auctionState !== 'revealed'}>UNSOLD</button>
-          </div>
+        {/* --- LEFT PANEL: CHAT & CONTROLS --- */}
+        <div className="auction-controls" style={{display:'flex', flexDirection:'column', height:'600px', background:'#f8f9fa', borderRadius:'10px', overflow:'hidden', boxShadow:'0 4px 6px rgba(0,0,0,0.1)'}}>
+           
+           {/* 1. TOP BAR: Team Identity & Actions */}
+           <div style={{padding:'15px', background:'white', borderBottom:'1px solid #e5e7eb'}}>
+                <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'10px'}}>
+                    <strong style={{fontSize:'1.1rem', color:'#1e3a8a'}}>
+                        {myTeam ? myTeam.abbr : (isHost ? "HOST" : "Spectator")}
+                    </strong>
+                    {myTeam && <span style={{fontSize:'0.8rem', background:'#dbeafe', color:'#1e40af', padding:'2px 8px', borderRadius:'10px'}}>Owner</span>}
+                </div>
+                
+                {/* Action Buttons */}
+                {myTeam && (
+                    <div style={{display:'flex', gap:'5px'}}>
+                         <button 
+                            onClick={requestTime} 
+                            disabled={status !== 'REVEALED' || isPaused} 
+                            style={{flex:1, background:'#3b82f6', color:'white', border:'none', padding:'8px', borderRadius:'5px', cursor:'pointer', fontSize:'0.8rem', opacity: status !== 'REVEALED' ? 0.5 : 1}}
+                         >
+                            ⏱ Need Time
+                         </button>
+                         {isInWar && !isMyBid && (
+                             <button 
+                                onClick={withdrawBid} 
+                                style={{flex:1, background:'#ef4444', color:'white', border:'none', padding:'8px', borderRadius:'5px', cursor:'pointer', fontSize:'0.8rem'}}
+                             >
+                                🏃 Withdraw
+                             </button>
+                         )}
+                    </div>
+                )}
+           </div>
+
+           {/* 2. CHAT AREA (Scrollable) */}
+           <div ref={feedRef} style={{flex:1, overflowY:'auto', padding:'10px', display:'flex', flexDirection:'column', gap:'8px', background:'#f3f4f6'}}>
+              {feed.length === 0 && <div style={{textAlign:'center', color:'#9ca3af', marginTop:'20px', fontSize:'0.9rem'}}>Chat is empty...</div>}
+              
+              {feed.map((item, i) => {
+                  const isChat = item.type === 'CHAT';
+                  const isMe = item.sender === (myTeam ? myTeam.abbr : (isHost ? "HOST" : "Spectator")); // Simple check
+                  
+                  if (!isChat) {
+                      // SYSTEM MESSAGES (Bids, Sales, Errors)
+                      return (
+                          <div key={i} style={{textAlign:'center', margin:'5px 0'}}>
+                              <span style={{
+                                  background: item.type === 'BID' ? '#dbeafe' : (item.type === 'SUCCESS' ? '#dcfce7' : '#fee2e2'), 
+                                  color: item.type === 'BID' ? '#1e40af' : (item.type === 'SUCCESS' ? '#166534' : '#991b1b'),
+                                  padding:'4px 12px', borderRadius:'12px', fontSize:'0.75rem', fontWeight:'bold', display:'inline-block'
+                              }}>
+                                  {item.msg}
+                              </span>
+                          </div>
+                      );
+                  } else {
+                      // USER CHAT BUBBLES
+                      return (
+                          <div key={i} style={{alignSelf: isMe ? 'flex-end' : 'flex-start', maxWidth:'85%'}}>
+                              {!isMe && <div style={{fontSize:'0.7rem', color:'#6b7280', marginLeft:'5px', marginBottom:'2px'}}>{item.sender}</div>}
+                              <div style={{
+                                  background: isMe ? '#2563eb' : 'white',
+                                  color: isMe ? 'white' : '#1f2937',
+                                  padding:'8px 12px', borderRadius:'12px',
+                                  borderBottomRightRadius: isMe ? '2px' : '12px',
+                                  borderBottomLeftRadius: isMe ? '12px' : '2px',
+                                  boxShadow:'0 1px 2px rgba(0,0,0,0.1)', fontSize:'0.9rem'
+                              }}>
+                                  {item.msg}
+                              </div>
+                          </div>
+                      );
+                  }
+              })}
+           </div>
+
+           {/* 3. CHAT INPUT */}
+           <form onSubmit={handleSendChat} style={{padding:'10px', background:'white', borderTop:'1px solid #e5e7eb', display:'flex', gap:'5px'}}>
+               <input 
+                  type="text" 
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  placeholder="Type a message..." 
+                  style={{flex:1, padding:'8px 12px', borderRadius:'20px', border:'1px solid #d1d5db', outline:'none'}}
+               />
+               <button type="submit" style={{background:'#2563eb', color:'white', border:'none', borderRadius:'50%', width:'35px', height:'35px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center'}}>
+                  ➤
+               </button>
+           </form>
         </div>
 
-        {/* CENTER: PLAYER CARD / ANIMATION */}
-        <div className="player-card-section">
-          {/* IDLE VIEW */}
-          {auctionState === 'idle' && (
-            <div style={{width: '100%', textAlign: 'center'}}>
-              {currentSet.players.length > 0 ? (
-                <div style={{display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'300px'}}>
-                   <div className="animation-container">
-                      <div style={{fontSize:'80px', opacity:0.3}}>🏏</div>
-                   </div>
-                   <button className="primary-btn" onClick={startReveal} style={{width:'auto', borderRadius:'50px', padding:'18px 40px', fontSize:'1.2rem', marginTop:'20px', transform:'scale(1.1)'}}>
-                     REVEAL PLAYER
-                   </button>
-                </div>
-              ) : (
-                <div>
-                   <h3>{currentSet.setName} Completed</h3>
-                   {currentSetIndex < playerSets.length - 1 ? (
-                      <button className="primary-btn" onClick={nextSet}>Next Set →</button>
-                   ) : (
-                      <div style={{display:'flex', flexDirection:'column', gap:'10px', alignItems:'center'}}>
-                        <p>All Sets Done!</p>
-                        {unsoldPlayers.length > 0 && <button className="primary-btn" style={{background:'#f59e0b'}} onClick={() => {if(startUnsoldRound()) setCurrentSetIndex(0)}}>Start Unsold Re-Auction</button>}
-                        <button className="btn-finish" onClick={finishAuction}>🏁 Finish Auction</button>
-                      </div>
-                   )}
-                </div>
-              )}
-            </div>
+        {/* CENTER PANEL */}
+        <div className="player-card-section" style={{position:'relative'}}>
+          {isPaused && (
+              <div style={{position:'absolute', top:0, left:0, width:'100%', height:'100%', background:'rgba(0,0,0,0.7)', zIndex:10, display:'flex', alignItems:'center', justifyContent:'center', borderRadius:'15px'}}>
+                  <h1 style={{color:'white', fontSize:'4rem', margin:0}}>PAUSED</h1>
+              </div>
           )}
 
-          {/* ANIMATION VIEW */}
-          {auctionState === 'animating' && (
-             <div className="animation-container">
-               <div className="cricket-emoji">🏏</div>
-               <div className="ball-emoji">⚪</div>
+          {status === 'IDLE' ? (
+             <div style={{textAlign:'center', marginTop:'50px'}}>
+                <div style={{fontSize:'80px', opacity:0.3, marginBottom:'20px'}}>🏏</div>
+                {isHost ? (
+                    <button className="primary-btn" onClick={startAutoLoop} style={{padding:'20px 40px', fontSize:'1.5rem', borderRadius:'50px', boxShadow:'0 10px 30px rgba(0,0,0,0.3)'}}>START SET</button>
+                ) : <h3 style={{color:'white'}}>Waiting for Host to start set...</h3>}
+             </div>
+          ) : (
+             <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                 {status === 'SOLD_ANIMATION' ? (
+                     <div className="fade-in" style={{textAlign:'center', marginTop:'50px'}}>
+                         <h1 style={{fontSize:'5rem', color: currentBidder ? '#22c55e' : '#ef4444', margin:0, textShadow:'0 5px 15px rgba(0,0,0,0.3)'}}>{currentBidder ? "SOLD" : "UNSOLD"}</h1>
+                         {currentBidder && <h3 style={{color:'white', fontSize:'2rem'}}>to {currentBidder} for {currentBid} Cr</h3>}
+                         <p style={{color:'#ccc'}}>Next player in 2s...</p>
+                     </div>
+                 ) : (
+                     <>
+                        <div style={{position:'absolute', top:'10px', right:'10px', background: timer <= 10 ? '#ef4444' : '#333', color:'white', width:'70px', height:'70px', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:'bold', fontSize:'2rem', boxShadow:'0 5px 15px rgba(0,0,0,0.3)', border:'4px solid white', zIndex:5}}>{timer}</div>
+                        <div style={{width: '220px', height: '220px', borderRadius: '50%', border: '8px solid #667eea', overflow: 'hidden', marginBottom: '20px', background: 'white', boxShadow:'0 10px 30px rgba(0,0,0,0.2)'}}>
+                            <img src={currentPlayer?.img || DEFAULT_AVATAR} alt="p" style={{width:'100%', height:'100%', objectFit:'cover'}} />
+                        </div>
+                        <h2 style={{fontSize:'2.5rem', margin:'0 0 10px 0'}}>{currentPlayer?.name}</h2>
+                        <div style={{display:'flex', gap:'10px', marginBottom:'20px'}}>
+                             <span className="badge role" style={{fontSize:'1rem', padding:'5px 15px'}}>{currentPlayer?.type}</span>
+                             <span className="badge country" style={{fontSize:'1rem', padding:'5px 15px'}}>{currentPlayer?.country}</span>
+                        </div>
+                        <div style={{background: currentBidder ? '#dbeafe' : '#f3f4f6', padding:'20px 50px', borderRadius:'15px', textAlign:'center', marginBottom:'30px', boxShadow:'inset 0 2px 5px rgba(0,0,0,0.05)'}}>
+                            <small style={{color:'#666', textTransform:'uppercase', letterSpacing:'1px'}}>Current Bid</small>
+                            <div style={{fontSize:'4rem', fontWeight:'900', color:'#1e3a8a', lineHeight:1}}>{currentBid} <span style={{fontSize:'1.5rem'}}>Cr</span></div>
+                            <div style={{color:'#2563eb', fontWeight:'bold', fontSize:'1.2rem', marginTop:'5px'}}>{currentBidder || "No Bids Yet"}</div>
+                        </div>
+
+                        {myTeam && (
+                            isLockedOut ? (
+                                <button disabled style={{background:'#6b7280', color:'white', border:'none', padding:'20px 60px', borderRadius:'50px', fontSize:'1.5rem', cursor:'not-allowed'}}>🔒 LOCKED OUT</button>
+                            ) : (
+                                <button onClick={() => placeBid(nextBid)} disabled={isMyBid} style={{background: isMyBid ? '#22c55e' : '#2563eb', color:'white', border:'none', padding:'20px 60px', borderRadius:'50px', fontSize:'2rem', fontWeight:'bold', cursor: isMyBid ? 'default' : 'pointer', transform: isMyBid ? 'none' : 'scale(1.05)', boxShadow:'0 10px 30px rgba(0,0,0,0.3)', transition: 'all 0.1s'}}>
+                                    {isMyBid ? "✅ YOU LEAD" : `BID ${nextBid} Cr`}
+                                </button>
+                            )
+                        )}
+                        {!myTeam && <div style={{color:'#aaa'}}>Observer Only</div>}
+                     </>
+                 )}
              </div>
           )}
-
-          {/* REVEALED VIEW */}
-          {auctionState === 'revealed' && currentPlayer && (
-            <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-              <div style={{width: '180px', height: '180px', borderRadius: '50%', border: '5px solid #667eea', boxShadow: '0 10px 20px rgba(0,0,0,0.2)', overflow: 'hidden', marginBottom: '20px', background: 'white'}}>
-                <img src={currentPlayer.img || DEFAULT_AVATAR} alt="p" style={{width:'100%', height:'100%', objectFit:'cover'}} />
-              </div>
-              <h2 style={{fontSize: '2rem', margin: '10px 0'}}>{currentPlayer.name}</h2>
-              <div style={{display:'flex', gap:'10px', marginBottom:'15px'}}>
-                   <span className="badge role">{currentPlayer.type}</span>
-                   <span className="badge country">{currentPlayer.country}</span>
-              </div>
-              <h3 style={{color:'#667eea', fontSize:'1.5rem', margin:0}}>Base: {currentPlayer.basePrice} Cr</h3>
-            </div>
-          )}
         </div>
 
-        {/* RIGHT: TABS */}
-        <div className="team-stats-panel">
-          <div style={{display:'flex', gap:'5px', marginBottom:'15px'}}>
-            <button onClick={()=>setActiveTab('standings')} style={{flex:1, padding:'5px', fontSize:'0.8rem', background: activeTab==='standings'?'#667eea':'#eee', color: activeTab==='standings'?'white':'#333', border:'none', borderRadius:'5px'}}>Teams</button>
-            <button onClick={()=>setActiveTab('setList')} style={{flex:1, padding:'5px', fontSize:'0.8rem', background: activeTab==='setList'?'#667eea':'#eee', color: activeTab==='setList'?'white':'#333', border:'none', borderRadius:'5px'}}>Set</button>
-            <button onClick={()=>setActiveTab('unsoldList')} style={{flex:1, padding:'5px', fontSize:'0.8rem', background: activeTab==='unsoldList'?'#667eea':'#eee', color: activeTab==='unsoldList'?'white':'#333', border:'none', borderRadius:'5px'}}>Unsold</button>
+        {/* --- RIGHT PANEL --- */}
+        <div className="team-stats-panel" style={{display:'flex', flexDirection:'column', gap:'10px'}}>
+          
+          <div style={{borderBottom:'1px solid #ddd', paddingBottom:'10px'}}>
+              <h4 style={{margin:'0 0 10px 0'}}>⚔️ Active Battle</h4>
+              {activeBidders.length === 0 && <small style={{color:'#999', fontStyle:'italic'}}>No active bid war</small>}
+              {activeBidders.map(teamName => (
+                  <div key={teamName} style={{padding:'8px', background:'#fee2e2', color:'#991b1b', marginBottom:'8px', borderRadius:'6px', border:'1px solid #fca5a5', fontWeight:'bold', display:'flex', alignItems:'center', gap:'10px'}}>
+                      <div className="pulsate" style={{width:'8px', height:'8px', background:'red', borderRadius:'50%'}}></div>
+                      {teamName}
+                  </div>
+              ))}
           </div>
-          <div style={{overflowY:'auto', maxHeight:'500px'}}>
+
+          <div style={{display:'flex', gap:'5px', marginBottom:'5px'}}>
+              {['teams', 'set', 'unsold'].map(tab => (
+                  <button key={tab} onClick={() => setRightTab(tab)} style={{flex:1, padding:'8px', cursor:'pointer', border:'none', borderRadius:'5px', background: rightTab === tab ? '#2563eb' : '#e5e7eb', color: rightTab === tab ? 'white' : '#666', fontWeight:'bold', textTransform:'capitalize'}}>
+                      {tab}
+                  </button>
+              ))}
+          </div>
+
+          <div style={{flex:1, overflowY:'auto', maxHeight:'500px'}}>
              
-             {/* --- TEAM STANDINGS WITH PLAYER LIST EXPANSION --- */}
-             {activeTab === 'standings' && activeTeams.map(t => {
-               const isOpen = expandedTeamName === t.name;
-               return (
-                 <div key={t.name} style={{marginBottom:'10px'}}>
-                    <div 
-                      className="mini-team-card" 
-                      style={{borderLeftColor: t.color || '#ccc', cursor:'pointer'}}
-                      onClick={() => toggleTeam(t.name)}
-                    >
-                      <div style={{display:'flex', justifyContent:'space-between'}}>
-                        <strong>{t.abbr} {isOpen ? '▼' : '▶'}</strong>
-                        <small>{t.squad.length}/{config.maxPlayers}</small>
-                      </div>
-                      <div className="progress-bar"><div className="progress-fill" style={{width: `${(t.squad.length/config.maxPlayers)*100}%`, background: t.color}}></div></div>
-                      <div style={{display:'flex', justifyContent:'space-between', marginTop:'2px', fontSize:'0.75rem'}}>
-                         <span>Rem: {t.budget}Cr</span>
-                         <span>Foreign: {t.foreignCount}</span>
-                      </div>
-                    </div>
-
-                    {/* EXPANDED SQUAD LIST */}
-                    {isOpen && (
-                       <div style={{background:'#f3f4f6', borderLeft:`4px solid ${t.color}`, marginLeft:'5px', padding:'5px', borderRadius:'0 0 5px 5px'}}>
-                         {t.squad.length > 0 ? (
-                           <ul style={{listStyle:'none', padding:0, margin:0}}>
-                             {t.squad.map((p, i) => (
-                               <li key={i} style={{fontSize:'0.8rem', borderBottom:'1px dashed #ddd', padding:'3px 0', display:'flex', justifyContent:'space-between'}}>
-                                 <span>{p.name}</span>
-                                 <strong>{p.soldPrice}L</strong>
-                               </li>
-                             ))}
-                           </ul>
-                         ) : (
-                           <small style={{color:'#999', fontStyle:'italic', padding:'5px'}}>No players yet</small>
-                         )}
-                       </div>
-                    )}
+             {/* 1. TEAMS VIEW */}
+             {rightTab === 'teams' && (
+                 <div style={{display:'flex', flexDirection:'column', gap:'10px'}}>
+                     {activeTeams
+                        .sort((a,b) => b.budget - a.budget)
+                        .map(t => {
+                             const stats = getTeamStats(t);
+                             const isExpanded = expandedTeamId === t.id;
+                             return (
+                                 <div key={t.id} style={{background:'white', borderRadius:'8px', overflow:'hidden', boxShadow:'0 1px 3px rgba(0,0,0,0.1)'}}>
+                                     <div onClick={() => toggleTeamView(t.id)} style={{padding:'10px', cursor:'pointer', borderLeft: `5px solid ${t.color}`, background: isExpanded ? '#f8fafc' : 'white', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                                        <div>
+                                            <strong style={{fontSize:'1rem', display:'block'}}>{t.abbr}</strong>
+                                            <small style={{color:'#666'}}>{t.squad.length}/{config.maxPlayers} Players</small>
+                                        </div>
+                                        <div style={{textAlign:'right'}}>
+                                            <div style={{fontWeight:'bold', color: t.budget < 10 ? 'red' : '#166534'}}>{t.budget} Cr</div>
+                                            <small style={{fontSize:'0.7rem', color:'#3b82f6'}}>{isExpanded ? "Hide" : "View"}</small>
+                                        </div>
+                                     </div>
+                                     {isExpanded && (
+                                         <div style={{borderTop:'1px solid #eee', background:'#f8f9fa', padding:'10px'}}>
+                                             <div style={{marginBottom:'5px', fontSize:'0.75rem', color:'#666'}}>Foreign: {t.foreignCount}/{config.maxForeign}</div>
+                                             {t.squad.length === 0 ? <small style={{fontStyle:'italic', color:'#999'}}>No players yet</small> : (
+                                                 <div style={{display:'flex', flexDirection:'column', gap:'5px'}}>
+                                                     {t.squad.map(p => (
+                                                         <div key={p.id} style={{display:'flex', justifyContent:'space-between', fontSize:'0.85rem', borderBottom:'1px solid #e5e7eb', paddingBottom:'2px'}}>
+                                                             <span>{p.name}</span>
+                                                             <span style={{fontWeight:'bold', color:'#333'}}>{p.soldPrice}</span>
+                                                         </div>
+                                                     ))}
+                                                 </div>
+                                             )}
+                                         </div>
+                                     )}
+                                 </div>
+                             );
+                     })}
                  </div>
-               );
-             })}
-
-             {/* SETS LIST */}
-            {activeTab === 'setList' && (
-              <div>
-                
-                {/* SECTION: CURRENT SET (ReadOnly Set Name, but Editable Players) */}
-                <div style={{background:'#eff6ff', padding:'8px', borderRadius:'6px', marginBottom:'10px', border:'1px solid #bfdbfe'}}>
-                  <strong style={{color:'#1e3a8a', display:'block', marginBottom:'5px'}}>🟢 Current: {currentSet.setName}</strong>
-                  <ul style={{listStyle:'none', padding:0, margin:0}}>
-                    {currentSet?.players.length > 0 ? (
-                      currentSet.players.map(p => (
-                        <li key={p.id} style={{padding:'4px 0', borderBottom:'1px solid #e5e7eb', fontSize:'0.85rem', color:'#374151', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-                            <span>{p.name}</span>
-                            {/* Delete Player Button */}
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if(window.confirm(`Remove ${p.name}?`)) deletePlayerFromSet(currentSetIndex, p.id);
-                              }}
-                              style={{border:'none', background:'transparent', cursor:'pointer', fontSize:'0.8rem'}}
-                              title="Remove Player"
-                            >
-                              ❌
-                            </button>
-                        </li>
-                      ))
-                    ) : (
-                      <li style={{fontSize:'0.8rem', color:'#9ca3af', fontStyle:'italic'}}>Set Finished</li>
-                    )}
-                  </ul>
-                </div>
-
-                {/* SECTION: UPCOMING SETS (Fully Deletable) */}
-                <div style={{background:'#fdf2f8', padding:'8px', borderRadius:'6px', border:'1px solid #fbcfe8'}}>
-                  <strong style={{color:'#be185d', display:'block', marginBottom:'5px'}}>🔜 Upcoming Sets</strong>
-                  <ul style={{listStyle:'none', padding:0, margin:0}}>
-                    {playerSets.map((s, idx) => {
-                      // Only show future sets
-                      if (idx > currentSetIndex) {
-                        const isOpen = expandedSetId === idx;
-                        return (
-                          <li key={idx} style={{marginBottom:'5px'}}>
-                            {/* SET HEADER */}
-                            <div 
-                              style={{
-                                padding:'6px 8px', 
-                                border:'1px solid #f9a8d4', 
-                                background: isOpen ? '#fce7f3' : 'white',
-                                color:'#831843', 
-                                fontSize:'0.85rem', 
-                                display:'flex', 
-                                justifyContent:'space-between',
-                                alignItems:'center',
-                                borderRadius: '5px',
-                                cursor: 'pointer',
-                                transition: 'background 0.2s'
-                              }}
-                              onClick={() => toggleSet(idx)}
-                            >
-                              <div style={{display:'flex', alignItems:'center', gap:'5px'}}>
-                                <span>{isOpen ? '▼' : '▶'} {s.setName}</span>
-                                <span style={{background:'#fbcfe8', padding:'0 6px', borderRadius:'10px', fontSize:'0.75rem'}}>
-                                  {s.players.length}
-                                </span>
-                              </div>
-
-                              {/* DELETE ENTIRE SET BUTTON */}
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation(); // Prevent toggling accordion
-                                  if(window.confirm(`Delete entire set: "${s.setName}"?`)) deleteSet(idx); // Use new deleteSet function
-                                }}
-                                style={{
-                                  background: '#fee2e2', color:'#ef4444', border:'none', 
-                                  borderRadius:'4px', padding:'2px 6px', fontSize:'0.7rem', cursor:'pointer'
-                                }}
-                                title="Delete Entire Set"
-                              >
-                                🗑️
-                              </button>
-                            </div>
-                            
-                            {/* EXPANDED PLAYER LIST */}
-                            {isOpen && (
-                              <ul style={{
-                                listStyle:'none', 
-                                padding:'5px 0 5px 15px', 
-                                margin:0, 
-                                background:'#fff0f7',
-                                borderLeft:'2px solid #f9a8d4'
-                              }}>
-                                {s.players.map(p => (
-                                  <li key={p.id} style={{fontSize:'0.8rem', padding:'3px 0', color:'#555', display:'flex', justifyContent:'space-between', paddingRight:'10px'}}>
-                                    <span>• {p.name}</span>
-                                    {/* DELETE PLAYER FROM UPCOMING SET */}
-                                    <button 
-                                      onClick={() => {
-                                        if(window.confirm(`Remove ${p.name}?`)) deletePlayerFromSet(idx, p.id);
-                                      }}
-                                      style={{border:'none', background:'transparent', cursor:'pointer', color:'#ef4444', fontSize:'0.7rem'}}
-                                    >
-                                      ❌
-                                    </button>
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
-                          </li>
-                        );
-                      }
-                      return null;
-                    })}
-                    
-                    {currentSetIndex >= playerSets.length - 1 && (
-                      <li style={{color:'#9ca3af', fontSize:'0.8rem', padding:'5px', fontStyle:'italic'}}>No more sets coming up.</li>
-                    )}
-                  </ul>
-                </div>
-              </div>
-            )}
-             {/* UNSOLD LIST */}
-             {activeTab === 'unsoldList' && (
-               <ul style={{listStyle:'none', padding:0}}>
-                 {unsoldPlayers.map(p => <li key={p.id} style={{padding:'8px', borderBottom:'1px solid #fee2e2', color:'#991b1b', fontSize:'0.9rem', background:'#fff5f5'}}>{p.name} ({p.basePrice}L)</li>)}
-               </ul>
              )}
+
+             {/* 2. SET VIEW */}
+             {rightTab === 'set' && (
+                 <div>
+                     {/* Current Set */}
+                     <div style={{marginBottom:'5px', background:'white', borderRadius:'8px', overflow:'hidden', border:'2px solid #2563eb'}}>
+                         <div 
+                             onClick={() => toggleSetView(currentSetIndex)}
+                             style={{padding:'10px', cursor:'pointer', display:'flex', justifyContent:'space-between', alignItems:'center', background: expandedSetIndex === currentSetIndex ? '#f0f9ff' : 'white'}}
+                         >
+                             <span style={{color:'#1e3a8a', fontWeight:'bold', fontSize:'0.9rem'}}>▶ Current: {currentSet.setName}</span>
+                             <span style={{background:'#dbeafe', color:'#1e40af', padding:'2px 6px', borderRadius:'10px', fontSize:'0.7rem'}}>{currentSet.players.length}</span>
+                         </div>
+                         
+                         {expandedSetIndex === currentSetIndex && (
+                             <ul style={{listStyle:'none', padding:0, margin:0, background:'#fff', borderTop:'1px solid #eee'}}>
+                                 {currentSet.players.map(p => (
+                                     <li key={p.id} style={{display:'flex', justifyContent:'space-between', alignItems:'center', padding:'8px', borderBottom:'1px solid #eee', background: currentPlayer?.id === p.id ? '#eff6ff' : 'white'}}>
+                                         <span style={{fontSize:'0.9rem', color: currentPlayer?.id === p.id ? '#1e40af' : '#333'}}>
+                                             {p.name} {currentPlayer?.id === p.id && " (Live)"}
+                                         </span>
+                                         {isHost && <button onClick={() => { if(window.confirm(`Remove ${p.name}?`)) deletePlayerFromSet(currentSetIndex, p.id) }} style={{background:'#fee2e2', color:'red', border:'none', borderRadius:'50%', width:'20px', height:'20px', cursor:'pointer'}}>✕</button>}
+                                     </li>
+                                 ))}
+                                 {currentSet.players.length === 0 && <li style={{color:'#999', padding:'10px', fontSize:'0.8rem'}}>Set Completed</li>}
+                             </ul>
+                         )}
+                     </div>
+
+                     {/* Upcoming Sets */}
+                     {playerSets.map((s, idx) => {
+                         if(idx <= currentSetIndex) return null; 
+                         const isExpanded = expandedSetIndex === idx;
+                         return (
+                             <div key={idx} style={{marginBottom:'5px', background:'white', borderRadius:'8px', overflow:'hidden', border:'1px solid #eee'}}>
+                                 <div 
+                                    onClick={() => toggleSetView(idx)}
+                                    style={{padding:'10px', cursor:'pointer', display:'flex', justifyContent:'space-between', alignItems:'center', background: isExpanded ? '#f8f9fa' : 'white'}}
+                                 >
+                                     <span style={{color:'#666', fontWeight:'bold', fontSize:'0.9rem'}}>{s.setName}</span>
+                                     <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
+                                         <span style={{background:'#eee', padding:'2px 6px', borderRadius:'10px', fontSize:'0.7rem'}}>{s.players.length}</span>
+                                         {isHost && (
+                                             <button 
+                                                onClick={(e) => { 
+                                                    e.stopPropagation(); 
+                                                    if(window.confirm(`Delete entire set "${s.setName}"?`)) deleteSet(idx);
+                                                }}
+                                                style={{background:'none', border:'none', cursor:'pointer', fontSize:'1rem'}} title="Delete Set"
+                                             >
+                                                 🗑️
+                                             </button>
+                                         )}
+                                     </div>
+                                 </div>
+                                 
+                                 {isExpanded && (
+                                     <ul style={{listStyle:'none', padding:0, margin:0, background:'#fafafa', borderTop:'1px solid #eee'}}>
+                                         {s.players.map(p => (
+                                             <li key={p.id} style={{padding:'8px 10px', borderBottom:'1px solid #eee', fontSize:'0.85rem', color:'#555', display:'flex', justifyContent:'space-between'}}>
+                                                 {p.name}
+                                                 {isHost && <button onClick={() => { if(window.confirm(`Remove ${p.name}?`)) deletePlayerFromSet(idx, p.id) }} style={{background:'#fee2e2', color:'red', border:'none', borderRadius:'50%', width:'20px', height:'20px', cursor:'pointer'}}>✕</button>}
+                                             </li>
+                                         ))}
+                                     </ul>
+                                 )}
+                             </div>
+                         );
+                     })}
+                 </div>
+             )}
+
+             {/* 3. UNSOLD VIEW */}
+             {rightTab === 'unsold' && (
+                 <div>
+                     {unsoldPlayers.length === 0 ? <p style={{textAlign:'center', color:'#999', marginTop:'20px'}}>No unsold players yet.</p> : (
+                         <div style={{display:'flex', flexDirection:'column', gap:'5px'}}>
+                             {unsoldPlayers.map(p => (
+                                 <div key={p.id} style={{padding:'10px', background:'#fee2e2', borderRadius:'5px', borderLeft:'4px solid #ef4444'}}>
+                                     <div style={{fontWeight:'bold', color:'#991b1b'}}>{p.name}</div>
+                                     <div style={{fontSize:'0.8rem', color:'#7f1d1d'}}>{p.type} | Base: {p.basePrice} Cr</div>
+                                 </div>
+                             ))}
+                         </div>
+                     )}
+                 </div>
+             )}
+
           </div>
         </div>
-
       </div>
     </div>
   );

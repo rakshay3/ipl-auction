@@ -1,0 +1,317 @@
+NAME,SET NAME,ROLE,COUNTRY,PRICE,IMAGE
+Andre Russell,Marquee Tier 1,All-rounder,West Indies,1C, andre_russell.avif
+David Warner,Marquee Tier 1,Batsman,Australia,2C, david_warner.avif
+Glenn Maxwell,Marquee Tier 1,All-rounder,Australia,2C, glenn_maxwell.avif
+Jasprit Bumrah,Marquee Tier 1,Bowler,India,2C,bumrah.avif
+Jos Buttler,Marquee Tier 1,Wicket-Keeper,England,2C,jos_buttler.avif
+MS Dhoni,Marquee Tier 1,Wicket-Keeper,India,3 Cr,ms_dhoni.avif
+Pat Cummins,Marquee Tier 1,All-rounder,Australia,2 Cr,pat_cummins.avif
+Rashid Khan,Marquee Tier 1,All-rounder,Afghanistan,2 Cr,rashid_khan.avif
+Rohit Sharma,Marquee Tier 1,Batsman,India,2 Cr,rohit_sharma.avif
+Sunil Narine,Marquee Tier 1,All-rounder,West Indies,2 Cr,sunil_narine.avif
+Travis Head,Marquee Tier 1,Batsman,Australia,2 Cr,travis_head.avif
+Virat Kohli,Marquee Tier 1,Batsman,India,3 Cr,virat_kohli.avif
+Jofra Archer,Marquee Tier 2,Bowler,England,2 Cr,jofra_archer.avif
+Aiden Markram,Marquee Tier 2,Batsman,South Africa,2 Cr,markram.avif
+Anrich Nortje,Marquee Tier 2,Bowler,South Africa,2 Cr, anrich_nortje.avif
+Axar Patel,Marquee Tier 2,All-rounder,India,2 Cr,axar_patel.avif
+Cameron Green,Marquee Tier 2,All-rounder,Australia,2 Cr, cameron_green.jpg
+David Miller,Marquee Tier 2,Batsman,South Africa,2 Cr, david_miller.jpg
+Devon Conway,Marquee Tier 2,Wicket-Keeper,New Zealand,2 Cr, devon_conway.avif
+Hardik Pandya,Marquee Tier 2,All-rounder,India,2 Cr,hardik_pandya.avif
+Harry Brook,Marquee Tier 2,Batsman,England,2 Cr, harry_brook.jpg
+Heinrich Klaasen,Marquee Tier 2,Wicket-Keeper,South Africa,2 Cr,heinrich_klaasen.avif
+Ishan Kishan,Marquee Tier 2,Wicket-Keeper,India,2 Cr,ishan_kishan.avif
+Jonny Bairstow,Marquee Tier 2,Wicket-Keeper,England,2 Cr, jonny_bairstow.avif
+Josh Hazlewood,Marquee Tier 2,Bowler,Australia,2 Cr,hazelwood.avif
+KL Rahul,Marquee Tier 2,Wicket-Keeper,India,2 Cr,kl_rahul.avif
+Kagiso Rabada,Marquee Tier 2,Bowler,South Africa,2 Cr,rabada.avif
+Liam Livingstone,Marquee Tier 2,All-rounder,England,2 Cr, liam_livingstone.avif
+Marcus Stoinis,Marquee Tier 2,All-rounder,Australia,2 Cr,stoinis.avif
+Mitchell Marsh,Marquee Tier 2,All-rounder,Australia,2 Cr,mitchell_marsh.avif
+Mitchell Starc,Marquee Tier 2,Bowler,Australia,2 Cr,mitchell_starc.avif
+Mohammed Shami,Marquee Tier 2,Bowler,India,2 Cr, mohammed_shami.avif
+Mohammed Siraj,Marquee Tier 2,Bowler,India,2 Cr,siraj.avif
+Nicholas Pooran,Marquee Tier 2,Batsman,West Indies,2 Cr,pooran.avif
+Phil Salt,Marquee Tier 2,Wicket-Keeper,England,2 Cr,phil_salt.avif
+Quinton de Kock,Marquee Tier 2,Wicket-Keeper,South Africa,2 Cr, qdk.avif
+Rachin Ravindra,Marquee Tier 2,All-rounder,New Zealand,2 Cr, rachin_ravindra.avif
+Ravichandran Ashwin,Marquee Tier 2,Batsman,India,2 Cr, ravichandran_ashwin.avif
+Ravindra Jadeja,Marquee Tier 2,All-rounder,India,2 Cr, ravindra_jadeja.avif
+Rishabh Pant,Marquee Tier 2,Wicket-Keeper,India,2 Cr,pant.avif
+Sam Curran,Marquee Tier 2,All-rounder,England,2 Cr, sam_curran.avif
+Sanju Samson,Marquee Tier 2,Wicket-Keeper,India,2 Cr, sanju_samson.avif
+Shreyas Iyer,Marquee Tier 2,Batsman,India,2 Cr,shreyas_iyer.avif
+Shubman Gill,Marquee Tier 2,Batsman,India,2 Cr,shubman_gill.avif
+Suryakumar Yadav,Marquee Tier 2,Batsman,India,2 Cr,sky.avif
+Trent Boult,Marquee Tier 2,Bowler,New Zealand,2 Cr,trent_boult.avif
+Wanindu Hasaranga,Marquee Tier 2,All-rounder,Sri Lanka,2 Cr, wanindu.avif
+Yashasvi Jaiswal,Marquee Tier 2,Batsman,India,2 Cr,jaiswal.avif
+Yuzvendra Chahal,Marquee Tier 2,Bowler,India,2 Cr,yuzi.avif
+Abhimanyu Easwaran,Capped Batsman,All-rounder,India,1.5 Cr, Abhimanyu_Easwaran.avif
+Abhishek Sharma,Capped Batsman,Batsman,India,1.5 Cr,abhisek_sharma.avif
+Abishek Porel,Capped Batsman,Wicket-Keeper,India,1.5 Cr,abhisek_porel.avif
+Ajinkya Rahane,Capped Batsman,Batsman,India,1.5 Cr,rahane.avif
+Alex Carey,Capped Batsman,Wicket-Keeper,Australia,1.5 Cr, alex_carey.avif
+Andre Fletcher,Capped Batsman,Batsman,West Indies,1.5 Cr, andre_fletcher.jpg
+Anmolpreet Singh,Capped Batsman,Batsman,India,1.5 Cr, Anmolpreet_Singh.avif
+Ashton Turner,Capped Batsman,Batsman,Australia,1.5 Cr, ashton_turner.avif
+Ben Duckett,Capped Batsman,Batsman,England,1.5 Cr, duckett.avif
+Ben McDermott,Capped Batsman,Wicket-Keeper,Australia,1.5 Cr, ben_mcdermott.png
+Bhanuka Rajapaksa,Capped Batsman,Batsman,Sri Lanka,1.5 Cr, bhanuka_rajapaksa.avif
+Brandon King,Capped Batsman,Batsman,West Indies,1.5 Cr, brandon_king.jpg
+Charith Asalanka,Capped Batsman,All-rounder,Sri Lanka,1.5 Cr, charith_asalanka.avif
+Daryl Mitchell,Capped Batsman,Batsman,New Zealand,1.5 Cr, daryl_mitchell.avif
+Devdutt Padikkal,Capped Batsman,Batsman,India,1.5 Cr,devdutt_padikkal.avif
+Dewald Brevis,Capped Batsman,Batsman,South Africa,1.5 Cr,dewald_brevis.avif
+Dhruv Jurel,Capped Batsman,Wicket-Keeper,India,1.5 Cr,dhurv_jurel.avif
+Evin Lewis,Capped Batsman,Batsman,West Indies,1.5 Cr, Evin_Lewis.png
+Faf du Plessis,Capped Batsman,Batsman,South Africa,1.5 Cr, faf.avif
+Finn Allen,Capped Batsman,Batsman,New Zealand,1.5 Cr, finn_allen.avif
+Glenn Phillips,Capped Batsman,Batsman,New Zealand,1.5 Cr, glenn_phillips.avif
+Ibrahim Zadran,Capped Batsman,Batsman,Afghanistan,1.5 Cr, zadran.avif
+Jake Fraser-McGurk,Capped Batsman,Batsman,Australia,1.5 Cr, jfk.avif
+James Vince,Capped Batsman,Batsman,England,1.5 Cr, vince.png
+Jitesh Sharma,Capped Batsman,Wicket-Keeper,India,1.5 Cr,jitesh_sharma.avif
+Jordan Cox,Capped Batsman,Wicket-Keeper,England,1.5 Cr, Jordan_Cox.jpg
+Josh Inglis,Capped Batsman,Wicket-Keeper,Australia,1.5 Cr, josh_inglis.avif
+Josh Philippe,Capped Batsman,Wicket-Keeper,Australia,1.5 Cr, josh_philippe.avif
+Kane Williamson,Capped Batsman,Batsman,New Zealand,1.5 Cr, kane_williamson.avif
+Karun Nair,Capped Batsman,Batsman,India,1.5 Cr,karun_nair.avif
+Kusal Mendis,Capped Batsman,Wicket-Keeper,Sri Lanka,1.5 Cr, kusal_mendis.avif
+Kusal Perera,Capped Batsman,Wicket-Keeper,Sri Lanka,1.5 Cr, kusal_perera.avif
+Kyle Verreynne,Capped Batsman,Wicket-Keeper,South Africa,1.5 Cr, kyle_verreynne.png
+Shahrukh Khan,Capped Batsman,Batsman,India,1.5 Cr,shahrukh_khan.avif
+Manan Vohra,Capped Batsman,Batsman,India,1.5 Cr, manan_vohra.avif
+Manish Pandey,Capped Batsman,Batsman,India,1.5 Cr,manish_pandey.avif
+Marco Jansen,Capped Batsman,Bowler,South Africa,1.5 Cr,marco_jansen.avif
+Mark Chapman,Capped Batsman,Batsman,New Zealand,1.5 Cr, mark_chapman.png
+Matthew Breetzke,Capped Batsman,Batsman,South Africa,1.5 Cr, matthew_breetzke.avif
+Mayank Agarawal,Capped Batsman,Batsman,India,1.5 Cr, mayank_agarwal.png
+Nitish Rana,Capped Batsman,Batsman,India,1.5 Cr, nitish_rana.avif
+Ollie Pope,Capped Batsman,Batsman,England,1.5 Cr, ollie_pope.png
+Pathum Nissanka,Capped Batsman,Batsman,Sri Lanka,1.5 Cr, Pathum_Nissanka.avif
+Prabhsimran Singh,Capped Batsman,Batsman,India,1.5 Cr, prabhsimran_singh.avif
+Prithvi Shaw,Capped Batsman,Batsman,India,1.5 Cr, prithivi_shaw.avif
+Rahmanullah Gurbaz,Capped Batsman,Wicket-Keeper,Afghanistan,1.5 Cr, gurbaz.avif
+Rahul Tripathi,Capped Batsman,Batsman,India,1.5 Cr, rahul_tripathi.avif
+Rajat Patidar,Capped Batsman,Batsman,India,1.5 Cr, rajat_patidar.avif
+Rassie van der Dussen,Capped Batsman,Batsman,South Africa,1.5 Cr, rvd.png
+Ricky Bhui,Capped Batsman,Batsman,India,1.5 Cr, ricky_bhui.avif
+Rilee Rossouw,Capped Batsman,Batsman,South Africa,1.5 Cr, Rilee_Rossouw.avif
+Rinku Singh,Capped Batsman,Batsman,India,1.5 Cr,rinku_singh.avif
+Rovman Powell,Capped Batsman,Batsman,West Indies,1.5 Cr,rovman_powell.avif
+Ruturaj Gaikwad,Capped Batsman,Batsman,India,1.5 Cr, Ruturaj_Gaikwad.avif
+Ryan Rickelton,Capped Batsman,Wicket-Keeper,South Africa,1.5 Cr, ryan_rickelton.avif
+Sai Sudharsan,Capped Batsman,Batsman,India,1.5 Cr, sai_sudharsan.avif
+Sam Billings,Capped Batsman,Wicket-Keeper,England,1.5 Cr, Sam_Billings.jpg
+Sarfaraz Khan,Capped Batsman,Batsman,India,1.5 Cr, Sarfaraz_Khan.avif
+Sediqullah Atal,Capped Batsman,Batsman,Afghanistan,1.5 Cr,Sediqullah_Atal.avif
+Shai Hope,Capped Batsman,Wicket-Keeper,West Indies,1.5 Cr, Shai_Hope.avif
+Sherfane Rutherford,Capped Batsman,Batsman,West Indies,1.5 Cr, SherfaneRutherford.avif
+Shimron Hetmyer,Capped Batsman,Batsman,India,1.5 Cr, shimron_hetmyer.avif
+Steven Smith,Capped Batsman,Batsman,Australia,1.5 Cr, Steven_Smith.avif
+Tilak Varma,Capped Batsman,Batsman,India,1.5 Cr, tilak_varma.avif
+Tim Seifert,Capped Batsman,Wicket-Keeper,New Zealand,1.5 Cr, Tim_Seifert.png
+Tom Banton,Capped Batsman,Wicket-Keeper,England,1.5 Cr, Tom_Banton.avif
+Tom Kohler-Cadmore,Capped Batsman,Batsman,India,1.5 Cr, Tom_Kohler-Cadmore.avif
+Tom Latham,Capped Batsman,Wicket-Keeper,New Zealand,1.5 Cr, Tom_Latham.png
+Towhid Hridoy,Capped Batsman,Batsman,Bangladesh,1.5 Cr, Towhid_Hridoy.avif
+Tristan Stubbs,Capped Batsman,Batsman,South Africa,1.5 Cr, Tristan_Stubbs.avif
+Adam Milne,Capped Bowler,Bowler,New Zealand,1.5 Cr, Adam_Milne.avif
+Adam Zampa,Capped Bowler,Bowler,India,1.5 Cr, Adam_Zampa.avif
+Adil Rashid,Capped Bowler,Bowler,India,1.5 Cr, Adil_Rashid.avif
+Akash Deep,Capped Bowler,Bowler,India,1.5 Cr, Akash_Deep.avif
+Akeal Hosein,Capped Bowler,Bowler,India,1.5 Cr, Akeal_Hosein.jpg
+Alzarri Joseph,Capped Bowler,Bowler,West Indies,1.5 Cr, Alzarri_Joseph.avif
+Arshdeep Singh,Capped Bowler,Bowler,India,1.5 Cr,arshdeep_singh.avif
+Avesh Khan,Capped Bowler,Bowler,India,1.5 Cr, avesh_khan.avif
+Basil Thampi,Capped Bowler,Bowler,India,1.5 Cr, Basil_Thampi.jpg
+Bhuvneshwar Kumar,Capped Bowler,Bowler,India,1.5 Cr, bhuvi.avif
+Chetan Sakariya,Capped Bowler,Bowler,India,1.5 Cr, Chetan_Sakariya.avif
+Deepak Chahar,Capped Bowler,Bowler,India,1.5 Cr, deepak_chahar.avif
+Dilshan Madushanka,Capped Bowler,Bowler,Sri Lanka,1.5 Cr, Dilshan_Madushanka.png
+Dushmantha Chameera,Capped Bowler,Bowler,Sri Lanka,1.5 Cr, dushmantha_chameera.avif
+Eshan Malinga,Capped Bowler,Bowler,Sri Lanka,1.5 Cr, eshan_malinga.avif
+Fazalhaq Farooqi,Capped Bowler,Bowler,Afghanistan,1.5 Cr, Fazalhaq_Farooqi.avif
+Gerald Coetzee,Capped Bowler,Bowler,South Africa,1.5 Cr, Gerald_Coetzee.avif
+Gus Atkinson,Capped Bowler,Bowler,England,1.5 Cr, Gus_Atkinson.png
+Harshal Patel,Capped Bowler,Bowler,India,1.5 Cr, harshal_patel.avif
+Harshit Rana,Capped Bowler,Bowler,India,1.5 Cr, harshit_rana.avif
+Ishant Sharma,Capped Bowler,Bowler,India,1.5 Cr,ishant_sharma.avif
+Jason Behrendorff,Capped Bowler,Bowler,Australia,1.5 Cr, Jason_Behrendorff.avif
+Jaydev Unadkat,Capped Bowler,Bowler,India,1.5 Cr,jaydev_unadkat.avif
+Jhye Richardson,Capped Bowler,Bowler,Australia,1.5 Cr, Jhye_Richardson.avif
+Josh Little,Capped Bowler,Bowler,Ireland,1.5 Cr, Josh_Little.avif
+Karn Sharma,Capped Bowler,Bowler,India,1.5 Cr, Karn_Sharma.avif
+Keshav Maharaj,Capped Bowler,Bowler,South Africa,1.5 Cr, Keshav_Maharaj.avif
+Khaleel Ahmed,Capped Bowler,Bowler,India,1.5 Cr,khaleel_ahmed.avif
+Kuldeep Sen,Capped Bowler,Bowler,India,1.5 Cr,kuldeep_sen.avif
+Kuldeep Yadav,Capped Bowler,Bowler,India,1.5 Cr,kuldeep_yadav.avif
+Lizaad Williams,Capped Bowler,Bowler,South Africa,1.5 Cr, Lizaad_Williams.avif
+Lockie Ferguson,Capped Bowler,Bowler,India,1.5 Cr, Lockie_Ferguson.avif
+Luke Wood,Capped Bowler,Bowler,England,1.5 Cr, Luke_Wood.jpg
+Lungi Ngidi,Capped Bowler,Bowler,South Africa,1.5 Cr, lungisani_ngidi.avif
+Maheesh Theekshana,Capped Bowler,Bowler,Sri Lanka,1.5 Cr, Maheesh_Theekshana.avif
+Matheesha Pathirana,Capped Bowler,Bowler,Sri Lanka,1.5 Cr, Matheesha_Pathirana.avif
+Matt Henry,Capped Bowler,Bowler,New Zealand,1.5 Cr, Matt_Henry.avif
+Mayank Markande,Capped Bowler,Bowler,India,1.5 Cr, Mayank_Markande.avif
+Mayank Yadav,Capped Bowler,Bowler,India,1.5 Cr, mayank_yadav.avif
+Mohit Sharma,Capped Bowler,Bowler,India,1.5 Cr, Mohit Sharma.avif
+Mohsin Khan,Capped Bowler,Bowler,India,1.5 Cr, moshin_khan.avif
+Mujeeb Ur Rahman,Capped Bowler,Bowler,Bangladesh,1.5 Cr, Mujeeb_Ur_Rahman.avif
+Mukesh Kumar,Capped Bowler,Bowler,India,1.5 Cr, mukesh_kumar.avif
+Murugan Ashwin,Capped Bowler,Bowler,India,1.5 Cr, Murugan_Ashwin.avif
+Mustafizur Rahman,Capped Bowler,Bowler,Bangladesh,1.5 Cr, Mustafizur_Rahman.avif
+Nandre Burger,Capped Bowler,Bowler,South Africa,1.5 Cr,burger.avif
+Nathan Ellis,Capped Bowler,Bowler,Australia,1.5 Cr, nathan_ellis.avif
+Navdeep Saini,Capped Bowler,Bowler,India,1.5 Cr, Navdeep_Saini.avif
+Naveen-ul-Haq,Capped Bowler,Bowler,Afghanistan,1.5 Cr, Naveen-ul-Haq.avif
+Noor Ahmad,Capped Bowler,Bowler,Afghanistan,1.5 Cr, noor_ahmad.avif
+Nuwan Thushara,Capped Bowler,Bowler,Sri Lanka,1.5 Cr, nuwan_thushara.avif
+Obed McCoy,Capped Bowler,Bowler,West Indies,1.5 Cr, Obed_McCoy.avif
+Piyush Chawla,Capped Bowler,Bowler,India,1.5 Cr, Piyush_Chawla.avif
+Prasidh Krishna,Capped Bowler,Bowler,India,1.5 Cr, prasidh_krishna.avif
+Rahul Chahar,Capped Bowler,Bowler,India,1.5 Cr, Rahul_Chahar.avif
+Ravi Bishnoi,Capped Bowler,Bowler,India,1.5 Cr, Ravi_Bishnoi.avif
+Reece Topley,Capped Bowler,Bowler,England,1.5 Cr, Reece_Topley.avif
+Richard Gleeson,Capped Bowler,Bowler,England,1.5 Cr, Richard_Gleeson.avif
+Riley Meredith,Capped Bowler,Bowler,Australia,1.5 Cr, Riley_Meredith.png
+Sai Kishore,Capped Bowler,Bowler,India,1.5 Cr, sai_kishore.avif
+Sandeep Sharma,Capped Bowler,Bowler,India,1.5 Cr, sandeep_sharma.avif
+Sandeep Warrier,Capped Bowler,Bowler,India,1.5 Cr, Sandeep_Warrier.avif
+Shamar Joseph,Capped Bowler,Bowler,West Indies,1.5 Cr, Shamar_Joseph.avif
+Shreyas Gopal,Capped Bowler,Bowler,India,1.5 Cr,shreyas_gopal.avif
+Siddarth Kaul,Capped Bowler,Bowler,India,1.5 Cr, Siddarth_Kaul.avif
+Spencer Johnson,Capped Bowler,Bowler,Australia,1.5 Cr, Spencer_Johnson.avif
+T Natarajan,Capped Bowler,Bowler,India,1.5 Cr, t_natarajan.avif
+Tabraiz Shamsi,Capped Bowler,Bowler,South Africa,1.5 Cr, Tabraiz_Shamsi.avif
+Taskin Ahmed,Capped Bowler,Bowler,Bangladesh,1.5 Cr, Taskin_Ahmed.avif
+Tim Southee,Capped Bowler,Bowler,New Zealand,1.5 Cr, Tim_Southee.avif
+Tushar Deshpande,Capped Bowler,Bowler,India,1.5 Cr, tushar_deshpande.avif
+Umesh Yadav,Capped Bowler,Bowler,India,1.5 Cr,Umesh_Yadav.avif
+Umran Malik,Capped Bowler,Bowler,India,1.5 Cr, Umran-Malik.jpg
+Varun Chakravarthy,Capped Bowler,Bowler,India,1.5 Cr, varun_chakaravarthy.avif
+Yash Dayal,Capped Bowler,Bowler,India,1.5 Cr, yash_dayal.avif
+Anukul Roy,Capped All-Rounder,All-rounder,India,1.5 Cr,ankul_roy.avif
+Azmatullah Omarzai,Capped All-Rounder,All-rounder,Afghanistan,1.5 Cr, azmatullah_omarzai.avif
+Chris Green,Capped All-Rounder,All-rounder,Australia,1.5 Cr, Chris_Green.avif
+Daniel Sams,Capped All-Rounder,All-rounder,Australia,1.5 Cr, Daniel_Sams.avif
+Dasun Shanaka,Capped All-Rounder,All-rounder,Sri Lanka,1.5 Cr, Dasun_Shanaka.avif
+Deepak Hooda,Capped All-Rounder,All-rounder,India,1.5 Cr, Deepak_Hooda.avif
+Dwaine Pretorius,Capped All-Rounder,All-rounder,South Africa,1.5 Cr, Dwaine_Pretorius.avif
+Gulbadin Naib,Capped All-Rounder,All-rounder,Afghanistan,1.5 Cr, Gulbadin_Naib.avif
+Harpreet Brar,Capped All-Rounder,All-rounder,India,1.5 Cr, harpreetbrar.avif
+Jacob Bethell,Capped All-Rounder,All-rounder,England,1.5 Cr, jacob_bethell.avif
+James Neesham,Capped All-Rounder,All-rounder,New Zealand,1.5 Cr, James_Neesham.avif
+Jason Holder,Capped All-Rounder,All-rounder,West Indies,1.5 Cr, Jason_Holder.avif
+Jayant Yadav,Capped All-Rounder,All-rounder,India,1.5 Cr,jayant_yadav.avif
+Krishnappa Gowtham,Capped All-Rounder,All-rounder,India,1.5 Cr, Krishnappa_Gowtham.avif
+Krunal Pandya,Capped All-Rounder,All-rounder,India,1.5 Cr,krunal_pandya.avif
+Kyle Mayers,Capped All-Rounder,All-rounder,West Indies,1.5 Cr, Kyle_Mayers.avif
+Michael Bracewell,Capped All-Rounder,All-rounder,New Zealand,1.5 Cr, Michael_Bracewell.avif
+Mitchell Santner,Capped All-Rounder,All-rounder,New Zealand,1.5 Cr,mitchell_santner.avif    
+Mitch Owen,Capped All-Rounder,All-rounder,Australia,1Cr, mitch_owen.avif
+Moeen Ali,Capped All-Rounder,All-rounder,England,1.5 Cr, Moeen_Ali.avif
+Mohammad Nabi,Capped All-Rounder,All-rounder,Afghanistan,1.5 Cr, Mohammad_Nabi.avif
+Nitish Kumar Reddy,Capped All-Rounder,All-rounder,India,1.5 Cr, nkr.avif
+Rahul Tewatia,Capped All-Rounder,All-rounder,India,1.5 Cr, rahul_tewatia.avif
+Riyan Parag,Capped All-Rounder,All-rounder,India,1.5 Cr,riyan_parag.avif
+Romario Shepherd,Capped All-Rounder,All-rounder,West Indies,1.5 Cr, romario_shepherd.avif
+Shahbaz Ahmed,Capped All-Rounder,All-rounder,India,1.5 Cr, shahbaz_ahamad.avif
+Shakib Al Hasan,Capped All-Rounder,All-rounder,Bangladesh,1.5 Cr, Shakib_Al_Hasan.avif
+Shardul Thakur,Capped All-Rounder,Bowler,India,1.5 Cr, Shardul_Thakur.avif
+Shivam Dube,Capped All-Rounder,All-rounder,India,1.5 Cr, shivam_dube.avif
+Sikandar Raza,Capped All-Rounder,All-rounder,Zimbabwe,1.5 Cr,Sikandar_Raza.avif
+Tim David,Capped All-Rounder,All-rounder,Australia,1.5 Cr, tim_david.avif
+Tom Curran,Capped All-Rounder,All-rounder,England,1.5 Cr, Tom_Curran.avif
+Venkatesh Iyer,Capped All-Rounder,All-rounder,India,1.5 Cr, Venkatesh_Iyer.avif
+Vijay Shankar,Capped All-Rounder,All-rounder,India,1.5 Cr, Vijay_Shankar.avif
+Washington Sundar,Capped All-Rounder,All-rounder,India,1.5 Cr, washington_sundar.avif
+Will Jacks,Capped All-Rounder,All-rounder,England,1.5 Cr, Will_Jacks.avif
+Abdul Samad,Uncapped All-Rounder,Batsman,India,50 L,abdul_samad.avif
+Abhinav Manohar,Uncapped Batsman,Batsman,India,50 L, Abhinav_Manohar.avif
+Ajay Mandal,Uncapped All-Rounder,All-rounder,India,50 L,Ajay_Mandal.avif
+Akash Madhwal,Uncapped Bowler,Bowler,India,50 L, Akash_Madhwal.avif
+Akash Singh,Uncapped Bowler,Bowler,India,50 L,akash_singh.avif
+Angkrish Raghuvanshi,Uncapped Batsman,Batsman,India,50 L,angkrish_raghuvanshi.avif
+Aniket Verma,Uncapped All-Rounder,Batsman,India,50 L,aniket_verma.avif
+Anshul Kamboj,Uncapped All-Rounder,Batsman,India,50 L,anshul_kamboj.avif
+Anuj Rawat,Uncapped Wicket-Keeper,Wicket-Keeper,India,50 L,anuj_rawat.avif
+Arjun Tendulkar,Uncapped All-Rounder,Batsman,India,50 L, Arjun_Tendulkar.jpg
+Arshad Khan,Uncapped All-Rounder,All-rounder,India,50 L,arshad_khan.avif
+Ashutosh Sharma,Uncapped All-Rounder,Batsman,India,50 L,ashutosh_sharma.avif
+Ashwani Kumar,Uncapped Bowler,Batsman,India,50 L,ashwani_kumar.avif
+Atharva Taide,Uncapped Batsman,Batsman,India,50 L, Atharva_Taide.avif
+Ayush Badoni,Uncapped All-Rounder,Batsman,India,50 L, ayush_badoni.avif
+Ayush Mhatre,Uncapped Batsman,Batsman,India,50 L, ayush_mhatre.avif
+BR Sharath,Uncapped Wicket-Keeper,Wicket-Keeper,India,50 L, BR.avif
+Ben Dwarshuis,Uncapped Bowler,Bowler,India,50 L, Ben_Dwarshuis.avif
+Blessing Muzarabani,Uncapped Bowler,Bowler,Zimbabwe,50 L, Blessing_Muzarabani.avif
+Brydon Carse,Uncapped All-Rounder,All-rounder,England,50 L, Brydon_Carse.png
+C Andre Siddarth,Uncapped All-Rounder,Batsman,India,50 L, C_Andre_Siddarth.avif
+Cooper Connolly,Uncapped All-Rounder,All-rounder,India,50 L, Cooper_Connolly.jpg
+Darshan Nalkande,Uncapped All-Rounder,All-rounder,India,50 L, Darshan_Nalkande.avif
+Digvesh Singh,Uncapped All-Rounder,Bowler,India,50 L, digvesh_singh.avif
+Donovan Ferreira,Uncapped Wicket-Keeper,Batsman,South Africa,50 L, Donovan.avif
+Gudakesh Motie,Uncapped Bowler,All-rounder,West Indies,50 L, Motie.jpg
+Gurjapneet Singh,Uncapped Bowler,Bowler,India,50 L, gurjapneet_singh.avif
+Himmat Singh,Uncapped Batsman,Batsman,India,50 L, himmat_singh.avif
+Jagadeesha Suchith,Uncapped All-Rounder,Batsman,India,50 L, Jagadeesha_Suchith.avif
+Jamie Overton,Uncapped All-Rounder,All-rounder,England,50 L,jamie_overton.avif
+Joshua Brown,Uncapped Batsman,Batsman,India,50 L, Joshua_Brown.png
+KC Cariappa,Uncapped Bowler,Batsman,India,50 L, KC.avif
+KM Asif,Uncapped Bowler,Batsman,India,50 L, KM_Asif.avif
+Kamindu Mendis,Uncapped All-Rounder,All-rounder,Sri Lanka,50 L, kamindu_mendis.avif
+Kamlesh Nagarkoti,Uncapped All-Rounder,Batsman,India,50 L, Kamlesh_Nagarkoti.avif
+Karim Janat,Uncapped All-Rounder,All-rounder,Afghanistan,50 L, Karim_Janat.avif
+Kartik Tyagi,Uncapped Bowler,Bowler,India,50 L, Kartik_Tyagi.avif
+Kumar Kushagra,Uncapped Wicket-Keeper,Wicket-Keeper,India,50 L, kumar_kushagra.avif
+Kwena Maphaka,Uncapped Bowler,Batsman,India,50 L,kwena_maphaka.avif
+Lalit Yadav,Uncapped All-Rounder,Batsman,India,50 L, Lalit_Yadav.avif
+Mahipal Lomror,Uncapped All-Rounder,All-rounder,India,50 L, Mahipal_Lomror.avif
+Manav Suthar,Uncapped All-Rounder,Bowler,India,50 L, manav_suthar.avif
+Manimaran Siddharth,Uncapped Bowler,Batsman,India,50 L,m_siddhart.avif
+Mayank Dagar,Uncapped All-Rounder,All-rounder,India,50 L, Mayank_Dagar.avif
+Mohit Rathee,Uncapped All-Rounder,Batsman,India,50 L, Mohit Rathee.avif
+Mukesh Choudhary,Uncapped Bowler,Batsman,India,50 L, mukesh_choudhary.avif
+Musheer Khan,Uncapped All-Rounder,All-rounder,India,50 L, musheer_khan.avif
+Naman Dhir,Uncapped All-Rounder,All-rounder,India,50 L, naman_dhir.avif
+Narayan Jagadeesan,Uncapped Wicket-Keeper,Wicket-Keeper,India,50 L, Narayan_Jagadeesan.avif
+Nehal Wadhera,Uncapped Batsman,Batsman,India,50 L,nehal_wadhera.avif
+Nishant Sindhu,Uncapped All-Rounder,Batsman,India,50 L, Nishant_Sindhu.avif
+Ottneil Baartman,Uncapped Bowler,Batsman,South Africa,50 L, Ottneil_Baartman.jpg
+Pradosh Ranjan Paul,Uncapped Batsman,Batsman,India,50 L, prp.png
+Prince Yadav,Uncapped Bowler,Batsman,India,50 L, prince_yadav.avif
+Priyansh Arya,Uncapped Batsman,Batsman,India,50 L, priyansh_arya.avif
+Rajvardhan Hangargekar,Uncapped All-Rounder,All-rounder,India,50 L, Rajvardhan_Hangargekar.avif
+Ramandeep Singh,Uncapped All-Rounder,Batsman,India,50 L, ramandeep_singh.avif
+Rasikh Salam,Uncapped Bowler,Bowler,India,50 L, rashik_dar.avif
+Robin Minz,Uncapped Wicket-Keeper,Wicket-Keeper,India,50 L,robin_minz.avif
+Sachin Baby,Uncapped Batsman,Batsman,India,50 L, Sachin_Baby.avif
+Sameer Rizvi,Uncapped Batsman,Batsman,India,50 L,rizvi.avif
+Shaik Rasheed,Uncapped Batsman,Batsman,India,50 L, Shaik_Rasheed.avif
+Shashank Singh,Uncapped Batsman,Batsman,India,50 L,shashank_singh.avif
+Shivam Singh,Uncapped All-Rounder,Batsman,India,50 L, Shivam_Singh.avif
+Shubham Dubey,Uncapped Batsman,Batsman,India,50 L, shubham_dubey.avif
+Simarjeet Singh,Uncapped Bowler,Bowler,India,50 L, Simarjeet_Singh.avif
+Sonu Yadav,Uncapped All-Rounder,All-rounder,India,50 L, Sonu_Yadav.avif
+Srikar Bharat,Uncapped Wicket-Keeper,Batsman,India,50 L, SrikarBharat.avif
+Suyash Prabhudessai,Uncapped Batsman,Batsman,India,50 L, Suyash_Prabhudessai.avif
+Suyash Sharma,Uncapped Bowler,Batsman,India,50 L, suyash_sharma.avif
+Swapnil Singh,Uncapped All-Rounder,All-rounder,India,50 L, swapnil_singh.avif
+Swastik Chikara,Uncapped Batsman,Batsman,India,50 L, Swastik_Chikara.avif
+Urvil Patel,Uncapped Wicket-Keeper,Wicket-Keeper,India,50 L,urvil_patel.avif
+Vaibhav Suryavanshi,Uncapped Batsman,Batsman,India,50 L, vaibhav_suryavanshi.avif
+Vaibhav Arora,Uncapped Bowler,Bowler,India,50 L, vaibhav_arora.avif
+Vansh Bedi,Uncapped Wicket-Keeper,Wicket-Keeper,India,50 L, Vansh_Bedi.avif
+Vidwath Kaverappa,Uncapped Bowler,Batsman,India,50 L, Vidwath_Kaverappa.avif
+Vijaykumar Vyshak,Uncapped Bowler,Bowler,India,50 L, vyshak_vijaykumar.avif
+Vipraj Nigam,Uncapped All-Rounder,All-rounder,India,50 L, Vipraj_Niga.avif
+Wiaan Mulder,Uncapped All-Rounder,All-rounder,South Africa,50 L, Wiaan_Mulder.avif
+William O'Rourke,Uncapped Bowler,Batsman,New Zealand,50 L, O'Rourke.avif
+Xavier Bartlett,Uncapped Bowler,Batsman,Australia,50 L, xavier_bartlett.avif
+Yash Dhull,Uncapped Batsman,Batsman,India,50 L, Yash_Dhull.avif
+Yash Thakur,Uncapped Bowler,Bowler,India,50 L, yash_thakur.avif
+Zakary Foulkes,Uncapped All-Rounder,All-rounder,New Zealand,50 L, Zakary_Foulkes.jpg
+Zeeshan Ansari,Uncapped Bowler,Batsman,India,50 L, zeeshan_ansari.avif
