@@ -23,7 +23,10 @@ const EVENTS = {
     NAVIGATE: 'NAVIGATE',
     END_ROOM: 'END_ROOM',
     SOLD: 'SOLD',
-    UNSOLD: 'UNSOLD'
+    UNSOLD: 'UNSOLD',
+    VOTE_FAST_AUCTION: 'VOTE_FAST_AUCTION',
+    SUBMIT_SHORTLIST: 'SUBMIT_SHORTLIST',
+    CONFIRM_FAST_AUCTION: 'CONFIRM_FAST_AUCTION'
 };
 
 const INITIAL_STATE = {
@@ -45,7 +48,10 @@ const INITIAL_STATE = {
     timer: 10,
     auctionStatus: 'IDLE', 
     isPaused: false,
-    finishVotes: [] 
+    finishVotes: [],
+    fastAuctionVotes: [],
+    teamShortlists: {},
+    aggregatedShortlist: [] 
 };
 
 function handleGameEvents(io, socket, rooms) {
@@ -276,6 +282,108 @@ function handleGameEvents(io, socket, rooms) {
         }
     });
 
+    // --- FAST AUCTION LOGIC ---
+
+    socket.on(EVENTS.VOTE_FAST_AUCTION, ({ roomId }) => {
+        const room = rooms[roomId];
+        if(!room) return;
+
+        const user = room.connectedUsers.find(u => u.id === socket.id);
+        const name = user ? user.name : "Unknown";
+
+        // Toggle Vote
+        if(room.fastAuctionVotes.includes(socket.id)) {
+            room.fastAuctionVotes = room.fastAuctionVotes.filter(id => id !== socket.id);
+            addToFeed(room, `⏳ ${name} cancelled Fast Auction vote.`, 'INFO');
+        } else {
+            room.fastAuctionVotes.push(socket.id);
+            addToFeed(room, `⚡ ${name} voted for Fast Auction (${room.fastAuctionVotes.length}/${room.connectedUsers.length}).`, 'SUCCESS');
+        }
+
+        // If everyone votes, move to Shortlist Page
+        if(room.connectedUsers.length > 0 && room.fastAuctionVotes.length >= room.connectedUsers.length) {
+            if(room.timerInterval) clearInterval(room.timerInterval);
+            room.currentPage = 'shortlist'; // New Page!
+            room.fastAuctionVotes = []; // Reset votes
+            addToFeed(room, `⚡ Fast Auction Initiated! Teams are selecting players.`, 'SUCCESS');
+        }
+        
+        broadcastState(roomId);
+    });
+
+    socket.on(EVENTS.SUBMIT_SHORTLIST, ({ roomId, playerIds }) => {
+        const room = rooms[roomId]; 
+        if(!room) return;
+
+        const team = room.activeTeams.find(t => t.ownerId === socket.id);
+        const identifier = team ? team.name : (room.hostId === socket.id ? 'HOST' : null);
+        
+        if(!identifier) return; // Only teams and host can submit
+
+        // Save this team's list
+        room.teamShortlists[identifier] = playerIds;
+        addToFeed(room, `📝 ${identifier} submitted their shortlist.`, 'INFO');
+
+        // Check if all active teams have submitted
+        const teamsSubmittedCount = Object.keys(room.teamShortlists).filter(k => k !== 'HOST').length;
+        
+        if (teamsSubmittedCount >= room.activeTeams.length) {
+            // ALL TEAMS SUBMITTED -> AGGREGATE THE LIST!
+            
+            // 1. Combine all IDs and remove duplicates using a Set
+            const uniquePlayerIds = new Set();
+            Object.values(room.teamShortlists).forEach(list => list.forEach(id => uniquePlayerIds.add(id)));
+            
+            // 2. Gather all available players (Unsold + Upcoming sets)
+            const allAvailablePlayers = [...room.unsoldPlayers];
+            room.playerSets.forEach((set, idx) => {
+                if (idx >= room.currentSetIndex) {
+                     // Only grab players who aren't sold yet
+                     allAvailablePlayers.push(...set.players.filter(p => !p.status || p.status === 'UNSOLD'));
+                }
+            });
+            
+            // 3. Match IDs to actual Player Objects
+            const finalPlayers = [];
+            uniquePlayerIds.forEach(id => {
+                const playerObj = allAvailablePlayers.find(p => p.id === id);
+                // Ensure no duplicates in final array just in case
+                if(playerObj && !finalPlayers.some(fp => fp.id === id)) {
+                    // Reset status so they can be auctioned again if they were unsold
+                    finalPlayers.push({ ...playerObj, status: null });
+                }
+            });
+            
+            room.aggregatedShortlist = finalPlayers;
+            room.currentPage = 'shortlist_review'; // Move to Host Confirmation Page
+            addToFeed(room, `✅ All lists submitted! Host reviewing final ${finalPlayers.length} players.`, 'SUCCESS');
+        }
+        
+        broadcastState(roomId);
+    });
+
+    socket.on(EVENTS.CONFIRM_FAST_AUCTION, ({ roomId }) => {
+        const room = rooms[roomId]; 
+        if(!room || room.hostId !== socket.id) return;
+
+        // The Ultimate Magic Trick: Replace all sets with the Accelerated Set
+        room.playerSets = [{
+            setName: "Accelerated Set 🔥",
+            players: room.aggregatedShortlist
+        }];
+        
+        room.currentSetIndex = 0;
+        room.currentPlayer = null;
+        room.unsoldPlayers = []; // Clear the old unsold list
+        room.teamShortlists = {}; // Reset shortlists
+        room.aggregatedShortlist = []; // Clear temp array
+        
+        room.currentPage = 'auction'; // Send everyone back to the auction!
+        
+        addToFeed(room, `🚀 Accelerated Auction Starting!`, 'SUCCESS');
+        broadcastState(roomId);
+    });
+
     socket.on(EVENTS.CLAIM_TEAM, ({ roomId, team }) => {
         const room = rooms[roomId]; if(!room) return;
         const isTaken = room.activeTeams.find(t => t.id === team.id && t.ownerId !== socket.id);
@@ -370,10 +478,6 @@ function handleGameEvents(io, socket, rooms) {
     socket.on(EVENTS.PAUSE_RESUME, ({ roomId }) => { const r = rooms[roomId]; if(r && r.hostId === socket.id) { r.isPaused = !r.isPaused; addToFeed(r, r.isPaused ? "⏸ Paused" : "▶ Resumed", 'INFO'); broadcastState(roomId); if(!r.isPaused && r.auctionStatus === 'IDLE') nextPlayerLoop(r, roomId); }});
     socket.on(EVENTS.CHANGE_TIMER, ({ roomId, seconds }) => { const r = rooms[roomId]; if(r && r.hostId === socket.id) { r.config.defaultTimer = parseInt(seconds); addToFeed(r, `⚙️ Timer: ${seconds}s`, 'INFO'); broadcastState(roomId); }});
     
-    // UPDATED SOLD/UNSOLD TO USE resolveRound (which handles status update)
-    socket.on(EVENTS.SOLD, ({ roomId, teamName, price }) => { const r = rooms[roomId]; if(r && r.hostId === socket.id) { r.currentBidder=teamName; r.currentBid=price; if(r.timerInterval) clearInterval(r.timerInterval); resolveRound(r, roomId); }});
-    socket.on(EVENTS.UNSOLD, ({ roomId }) => { const r = rooms[roomId]; if(r && r.hostId === socket.id) { r.currentBidder=null; if(r.timerInterval) clearInterval(r.timerInterval); resolveRound(r, roomId); }});
-    
     socket.on(EVENTS.PLAYER_READY, ({ roomId }) => { const r = rooms[roomId]; if(r) { const u = r.connectedUsers.find(x => x.id === socket.id); if(u) { u.isReady = !u.isReady; broadcastState(roomId); }}});
     
     socket.on(EVENTS.ADD_CUSTOM_TEAM, ({ roomId, team }) => {
@@ -404,6 +508,7 @@ function handleGameEvents(io, socket, rooms) {
     
     socket.on(EVENTS.NAVIGATE, ({ roomId, page }) => { if(rooms[roomId]) { rooms[roomId].currentPage = page; broadcastState(roomId); }});
     socket.on(EVENTS.UPDATE_SETTINGS, ({ roomId, config }) => { const r = rooms[roomId]; if(r) { r.config = config; r.activeTeams.forEach(t => t.budget = parseFloat(config.budget)); broadcastState(roomId); }});
+
 }
 
 module.exports = { handleGameEvents };

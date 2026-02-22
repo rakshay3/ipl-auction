@@ -9,7 +9,7 @@ const AuctionPage = () => {
     currentAuctionState, feed, 
     startAutoLoop, placeBid, pauseGame, withdrawBid, requestTime, changeTimer,
     currentSetIndex, canFinishAuction,
-    sellPlayer, markUnsold,
+    voteFastAuction, fastAuctionVotes, connectedUsers,
     voteFinish, finishVotes, endRoom,
     deletePlayerFromSet, deleteSet,
     sendMessage // <--- NEW
@@ -108,37 +108,23 @@ const AuctionPage = () => {
                 {finishVotes.includes(socket?.id) ? `✅ Voted` : `🏁 Finish`}
             </button>
 
+            <button 
+                onClick={voteFastAuction}
+                style={{
+                    background: fastAuctionVotes.includes(socket?.id) ? '#f59e0b' : 'transparent',
+                    color: fastAuctionVotes.includes(socket?.id) ? 'white' : '#f59e0b',
+                    border: '2px solid #f59e0b',
+                    padding: '5px 15px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold',
+                    minWidth: '140px'
+                }}
+                title="Accelerated Auction"
+            >
+                {fastAuctionVotes.includes(socket?.id) ? `⚡ Voted (${fastAuctionVotes.length}/${connectedUsers.length})` : `⚡ Fast Auction (${fastAuctionVotes.length}/${connectedUsers.length})`}
+            </button>
+
             {/* HOST CONTROLS */}
             {isHost && (
                 <>
-                   {/* 1. COMPACT ADMIN ACTIONS (Sell/Unsold) */}
-                   <div style={{display:'flex', flexDirection:'column', gap:'3px'}}>
-                       <button 
-                           onClick={() => sellPlayer(currentPlayer, currentBidder, currentBid)} 
-                           disabled={!currentBidder}
-                           style={{
-                               background: currentBidder ? '#22c55e' : '#9ca3af', 
-                               color:'white', border:'none', padding:'4px 8px', borderRadius:'4px', 
-                               fontSize:'0.7rem', cursor: currentBidder ? 'pointer' : 'not-allowed',
-                               fontWeight:'bold', letterSpacing:'1px'
-                           }}
-                           title="Force Sell to Current Bidder"
-                       >
-                           ⚡ SELL
-                       </button>
-                       <button 
-                           onClick={() => markUnsold(currentPlayer)} 
-                           style={{
-                               background:'#ef4444', color:'white', border:'none', padding:'4px 8px', 
-                               borderRadius:'4px', fontSize:'0.7rem', cursor:'pointer',
-                               fontWeight:'bold', letterSpacing:'1px'
-                           }}
-                           title="Force Mark Unsold"
-                       >
-                           ✕ UNSOLD
-                       </button>
-                   </div>
-
                    {/* 2. TIMER SETTING */}
                    <div style={{background:'rgba(255,255,255,0.2)', padding:'5px', borderRadius:'5px', display:'flex', gap:'5px', alignItems:'center'}}>
                       <input 

@@ -37,6 +37,10 @@ export const AuctionProvider = ({ children }) => {
     isPaused: false
   });
 
+  const [fastAuctionVotes, setFastAuctionVotes] = useState([]);
+  const [aggregatedShortlist, setAggregatedShortlist] = useState([]);
+  const [teamShortlists, setTeamShortlists] = useState({});
+
   useEffect(() => {
     const newSocket = io(SOCKET_URL);
     setSocket(newSocket);
@@ -88,6 +92,9 @@ export const AuctionProvider = ({ children }) => {
       if(serverState.finishVotes) setFinishVotes(serverState.finishVotes);
       if(serverState.currentPage) setCurrentPage(serverState.currentPage);
       if(serverState.currentSetIndex !== undefined) setCurrentSetIndex(serverState.currentSetIndex);
+      if(serverState.fastAuctionVotes) setFastAuctionVotes(serverState.fastAuctionVotes);
+      if(serverState.aggregatedShortlist) setAggregatedShortlist(serverState.aggregatedShortlist);
+      if(serverState.teamShortlists) setTeamShortlists(serverState.teamShortlists);
       
       setCurrentAuctionState({
         currentPlayer: serverState.currentPlayer,
@@ -162,14 +169,15 @@ export const AuctionProvider = ({ children }) => {
   const changeTimer = (seconds) => socket?.emit('CHANGE_TIMER', { roomId, seconds });
   const voteFinish = () => socket?.emit('VOTE_FINISH', { roomId });
   const endRoom = () => socket?.emit('END_ROOM', { roomId }); 
-  const sellPlayer = (player, teamName, soldPrice) => socket?.emit('SOLD', { roomId, teamName, price: soldPrice });
-  const markUnsold = (player) => socket?.emit('UNSOLD', { roomId });
   const startReveal = (player) => {}; 
   const resetGame = () => window.location.reload(); 
   const navigateTo = (page) => socket?.emit('NAVIGATE', { roomId, page });
   const canFinishAuction = () => activeTeams.every(team => team.squad && team.squad.length >= config.minPlayers);
   const deleteSet = (setIndex) => socket?.emit('DELETE_SET', { roomId, setIndex });
   const sendMessage = (message) => socket?.emit('MESSAGE', { roomId, message });
+  const voteFastAuction = () => socket?.emit('VOTE_FAST_AUCTION', { roomId });
+  const submitShortlist = (playerIds) => socket?.emit('SUBMIT_SHORTLIST', { roomId, playerIds });
+  const confirmFastAuction = () => socket?.emit('CONFIRM_FAST_AUCTION', { roomId });
   return (
     <AuctionContext.Provider value={{
       socket, isConnected, roomId, isHost,
@@ -186,8 +194,10 @@ export const AuctionProvider = ({ children }) => {
       startAutoLoop, pauseGame, placeBid, withdrawBid, requestTime, changeTimer,
       voteFinish, endRoom,
       
-      sellPlayer, markUnsold, startReveal,
-      resetGame, setCurrentPage: navigateTo, canFinishAuction, sendMessage
+      startReveal,
+      resetGame, setCurrentPage: navigateTo, canFinishAuction, sendMessage,
+      fastAuctionVotes, aggregatedShortlist, teamShortlists,
+      voteFastAuction, submitShortlist, confirmFastAuction
     }}>
       {children}
     </AuctionContext.Provider>

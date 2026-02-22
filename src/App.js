@@ -6,6 +6,7 @@ import AuctionPage from './components/AuctionPage';
 import SummaryPage from './components/SummaryPage';
 import SelectionPage from './components/SelectionPage';
 import './App.css';
+import ShortlistPage from './components/ShortlistPage';
 
 const GameController = () => {
   const { currentPage } = useAuction();
@@ -17,6 +18,8 @@ const GameController = () => {
     case 'review': return <SetReviewPage />;
     case 'auction': return <AuctionPage />;
     case 'summary': return <SummaryPage />;
+    case 'shortlist': return <ShortlistPage />;
+    case 'shortlist_review': return <ShortlistPage />;
     default: return <LandingPage />;
   }
 };
