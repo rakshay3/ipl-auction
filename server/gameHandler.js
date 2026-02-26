@@ -374,6 +374,7 @@ function handleGameEvents(io, socket, rooms) {
         
         room.currentSetIndex = 0;
         room.currentPlayer = null;
+        room.auctionStatus = 'IDLE';
         room.unsoldPlayers = []; // Clear the old unsold list
         room.teamShortlists = {}; // Reset shortlists
         room.aggregatedShortlist = []; // Clear temp array
@@ -426,7 +427,9 @@ function handleGameEvents(io, socket, rooms) {
     socket.on(EVENTS.BID, ({ roomId, amount }) => {
         const room = rooms[roomId];
         if(!room || room.auctionStatus !== 'REVEALED' || room.isPaused) return;
-
+        if(!room.currentPlayer) {
+            return socket.emit(EVENTS.ERROR, "No active player to bid on!");
+        }
         const team = room.activeTeams.find(t => t.ownerId === socket.id);
         if(!team) return socket.emit(EVENTS.ERROR, "No Team Assigned");
 
