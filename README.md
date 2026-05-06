@@ -1,70 +1,61 @@
-# Getting Started with Create React App
+# 🏏 IPL Auction Multiplayer
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
+![Socket.io](https://img.shields.io/badge/Socket.io-010101?style=for-the-badge&logo=socketdotio&logoColor=white)
+![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white)
 
-## Available Scripts
+A highly interactive, real-time multiplayer IPL Auction simulator. Built with a decoupled "Dumb Frontend / Smart Backend" architecture, this application allows a host to manage a player pool while multiple connected clients engage in live, synchronized bidding wars.
 
-In the project directory, you can run:
 
-### `npm start`
+## ✨ Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+* **Real-Time Bidding Engine:** Powered by Socket.IO, ensuring synchronization of bids, timers, and team purses across all connected clients.
+* **Smart Bidding Logic:** Server-side validation prevents self-bidding, enforces maximum player limits, caps foreign player slots, and locks out third-party teams during active 1v1 bidding wars.
+* **Host Mode Dashboard:** The room host has complete control to pause/resume the timer, manually adjust the countdown, force-skip players, and upload custom CSV datasets to build the auction pool.
+* **Consensus Mechanics:** Features a "Fast Auction" voting system where teams can submit shortlists. Once consensus is reached, the server aggregates the data and skips directly to the desired players.
+* **Role-Based UI & Auto-Reconnect:** Seamless session recovery using `localStorage` ensures that users who accidentally refresh do not lose their team ownership or room status.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🛠 Tech Stack
 
-### `npm test`
+* **Frontend:** React.js, Context API (for global WebSocket state management), CSS3.
+* **Backend:** Node.js, Express.js.
+* **Real-Time Communication:** Socket.IO (WebSockets).
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 🚀 Local Setup & Installation
 
-### `npm run build`
+### Prerequisites
+Make sure you have [Node.js](https://nodejs.org/) installed on your machine.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 1. Clone the Repository
+-> clone repository  
+-> cd ipl-auction
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 2. Backend Setup
+Open a terminal in the root directory.
+\`\`\`
+cd server
+npm install
+node server.js
+\`\`\`
+*The server will start running on `http://localhost:4000`.*
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 3. Frontend Setup
+Open a second, separate terminal in the root directory.
+\`\`\`
+npm install
+npm start
+\`\`\`
+*The React app will open in your browser at `http://localhost:3000`.*
 
-### `npm run eject`
+## 📂 Project Architecture Highlights
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+* **`AuctionContext.js`:** The brain of the frontend. It maintains the WebSocket connection, catches the `STATE_UPDATE` broadcasts from the backend, and distributes the data to all React components, preventing the need for prop-drilling.
+* **`gameHandler.js`:** The backend logic. It maintains an in-memory dictionary of all active rooms, validates every `EVENTS.BID`, calculates purse deductions, and controls the automated timer interval.
+* **Data Parsing:** The frontend includes a robust CSV parser (`SelectionPage.jsx`) that safely converts human-readable prices (e.g., "2C" or "50L") into strict numerical values for the backend engine.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## 📝 Usage / Game Flow
+1. **Host** creates a room and shares the Room Code / link.
+2. **Players** join the lobby and claim an IPL team or create a custom one.
+3. **Host** uploads a CSV of players and starts the auction.
+4. **Bidding:** The timer ticks down. Bids automatically increment based on backend logic. Highest bidder when the timer hits 0 wins the player!
